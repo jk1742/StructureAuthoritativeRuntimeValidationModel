@@ -14,31 +14,31 @@ No personally identifying information is included; all paths are relative.
 ```
 .
 ├── README.md
-├── results_dashboard.html        # results overview (open from the repo root)
+├── results_dashboard.html              # results overview (open from the repo root)
 │
-├── browser/                      # live-browser cross-engine confirmation (ES modules)
-│   ├── detection_harness.html    # interactive: S4 / T1 / control, or ?auto=1
-│   ├── model-core.mjs            # minimal reference implementation (no dependencies)
-│   ├── scenarios.mjs             # S4 / T1 / control scenario definitions
+├── browser/                            # live-browser cross-engine confirmation (ES modules)
+│   ├── detection_harness.html          # interactive: S4 / T1 / control, or ?auto=1
+│   ├── model-core.mjs                  # minimal reference implementation (no dependencies)
+│   ├── scenarios.mjs                   # S4 / T1 / control scenario definitions
 │   ├── run_browser_detection.mjs # Playwright runner (Chromium + Firefox)
 │   ├── package.json
-│   └── results/                  # captured measurements
+│   └── results/                        # captured measurements
 │       ├── browser_detection_chromium.json
 │       └── browser_detection_firefox.json
 │
-└── jsdom/                        # primary JSDOM experiments (CommonJS)
-    ├── case_1/                   # Case 1 — Runtime State Forgery Detection
-    │   ├── case1_experiment.js       # S1–S4 detection
-    │   ├── case1_overhead_v2.js      # validation time + payload
-    │   ├── generate_figures_svg.js   # figures from the JSON results
+└── jsdom/                              # primary JSDOM experiments (CommonJS)
+    ├── case_1/                         # Case 1 — Runtime State Forgery Detection
+    │   ├── case1_experiment.js         # S1–S4 detection
+    │   ├── case1_overhead_v2.js        # validation time + payload
+    │   ├── generate_figures_svg.js     # figures from the JSON results
     │   ├── case1_result.json / case1_overhead.json
     │   └── case1_fig1_detection.svg / case1_fig2_validation_time.svg / case1_fig3_payload_size.svg
-    ├── case_3/                   # Case 3 — Snapshot Diff vs. Identity Continuity
+    ├── case_3/                         # Case 3 — Snapshot Diff vs. Identity Continuity
     │   ├── case3_experiment.js / case3_overhead.js
     │   ├── generate_case3_figures.js
     │   ├── case3_result.json / case3_overhead.json
     │   └── case3_fig1_detection.svg
-    └── case_4/                   # Case 4 — Component Reconstruction Consistency
+    └── case_4/                         # Case 4 — Component Reconstruction Consistency
         ├── case4_experiment.js / case4_overhead.js
         ├── generate_case4_figures.js
         ├── case4_result.json / case4_overhead.json
