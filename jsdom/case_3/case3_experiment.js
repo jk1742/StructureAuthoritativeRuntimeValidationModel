@@ -292,7 +292,7 @@ for (const r of results) {
 }
 
 require("fs").writeFileSync(
-  "/home/claude/exp_case1/case3_result.json",
+  "./case3_result.json",
   JSON.stringify(results, null, 2)
 );
-console.log("\nJSON result -> /home/claude/exp_case1/case3_result.json");
+console.log("\nJSON result -> ./case3_result.json");

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Structure-Authoritative Runtime Validation — Experimental Results</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { color-scheme: light dark; --line: rgba(128,128,128,.35); }
+  body { font-family: system-ui,-apple-system,sans-serif; max-width: 1040px; margin: 1.5rem auto; padding: 0 1rem; line-height: 1.55; }
+  h1 { font-size: 1.3rem; } h2 { font-size: 1.05rem; margin-top: 2rem; border-bottom: 2px solid var(--line); padding-bottom: .3rem; }
+  h3 { font-size: .95rem; margin: 1.1rem 0 .4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; margin: .5rem 0 1rem; }
+  th,td { border: 1px solid var(--line); padding: .35rem .55rem; text-align: center; }
+  th { background: rgba(128,128,128,.12); font-weight: 600; }
+  td.l, th.l { text-align: left; }
+  .det { color: #2da44e; font-weight: 600; }
+  .byp { color: #e5484d; font-weight: 600; }
+  .note { font-size: .82rem; opacity: .75; margin: .2rem 0 .9rem; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+  @media (max-width: 740px){ .grid2 { grid-template-columns: 1fr; } }
+  .chartbox { border: 1px solid var(--line); border-radius: 8px; padding: .6rem; }
+</style>
+</head>
+<body>
+<h1>Structure-Authoritative Runtime Validation — Experimental Results</h1>
+<p class="note">Reference-implementation results for the evaluation (Section 6). Detection outcomes under JSDOM with cross-engine confirmation on Chromium and Firefox. Overhead figures are JSDOM means over 7 runs; absolute timing is environment-dependent and is not claimed.</p>
+
+<h2>Case 1 — Runtime State Forgery Detection</h2>
+<p class="note">Scenarios S1–S3 tamper with a property alone; S4 additionally forges the in-DOM <code>&lt;meta&gt;</code> that the baseline uses as its reference. The two models diverge exactly on the evasion scenario.</p>
+<table>
+<thead><tr><th class="l">Scenario</th><th class="l">Attack</th><th>Baseline (in-DOM meta)</th><th>Proposed (registry)</th></tr></thead>
+<tbody>
+<tr><td class="l">S1 input.value</td><td class="l">direct value forgery</td><td class="det">Detected</td><td class="det">Detected</td></tr>
+<tr><td class="l">S2 checkbox.checked</td><td class="l">direct forgery</td><td class="det">Detected</td><td class="det">Detected</td></tr>
+<tr><td class="l">S3 textarea.value</td><td class="l">direct forgery</td><td class="det">Detected</td><td class="det">Detected</td></tr>
+<tr><td class="l">S4-a value + meta</td><td class="l">co-forgery (evasion)</td><td class="byp">Bypassed</td><td class="det">Detected</td></tr>
+<tr><td class="l">S4-b checked + meta</td><td class="l">co-forgery (evasion)</td><td class="byp">Bypassed</td><td class="det">Detected</td></tr>
+<tr><td class="l">S4-c textarea + meta</td><td class="l">co-forgery (evasion)</td><td class="byp">Bypassed</td><td class="det">Detected</td></tr>
+</tbody>
+</table>
+
+<h2>Case 3 — Snapshot Diff vs. Identity Continuity</h2>
+<p class="note">T1 is an identical-form replacement (stale-subtree): an existing input node is removed and replaced by a new node of identical tag and value. The snapshot baseline sees no difference; the identity model detects the broken binding.</p>
+<table>
+<thead><tr><th class="l">Scenario</th><th>Snapshot-diff</th><th>Identity continuity (proposed)</th></tr></thead>
+<tbody>
+<tr><td class="l">T1 identical-form replacement (stale-subtree)</td><td class="byp">Missed</td><td class="det">Detected</td></tr>
+<tr><td class="l">T2 genuine no-op (control)</td><td class="det">not flagged</td><td class="det">not flagged</td></tr>
+<tr><td class="l">T3 value mutation</td><td class="det">Detected</td><td class="det">Detected</td></tr>
+<tr><td class="l">T4 unauthorized structural insertion</td><td class="det">Detected</td><td class="det">Detected</td></tr>
+</tbody>
+</table>
+
+<h2>Case 4 — Component Reconstruction Consistency</h2>
+<p class="note">R1 requires runtime state preservation across reconstruction; R2 requires that a new authority-issued identity discards stale state. Only identity reconciliation satisfies both.</p>
+<table>
+<thead><tr><th class="l">Model</th><th>R1 — state preservation</th><th>R2 — identity-aware</th><th>Combined</th></tr></thead>
+<tbody>
+<tr><td class="l">innerHTML swap</td><td class="byp">Lost</td><td class="det">Correctly discarded</td><td>R2 only</td></tr>
+<tr><td class="l">keyed reconcile</td><td class="det">Preserved</td><td class="byp">False reuse</td><td>R1 only</td></tr>
+<tr><td class="l">identity reconciliation (proposed)</td><td class="det">Preserved</td><td class="det">Correctly discarded</td><td class="det">R1 + R2</td></tr>
+</tbody>
+</table>
+
+<h2>Cross-Engine Confirmation (live browser, Playwright)</h2>
+<p class="note">The S4 evasion and T1 stale-subtree cases reproduce identically on two real engines. Engine versions are captured at run time.</p>
+<table>
+<thead><tr><th class="l">Scenario</th><th>Expected</th><th>Chromium 148.0.7778.96</th><th>Firefox 150.0.2</th></tr></thead>
+<tbody>
+<tr><td class="l">S4 evasion forgery (value + meta)</td><td>Detected</td><td class="det">Detected</td><td class="det">Detected</td></tr>
+<tr><td class="l">T1 identical-form replacement</td><td>Detected</td><td class="det">Detected</td><td class="det">Detected</td></tr>
+<tr><td class="l">control (valid state)</td><td>not detected</td><td class="det">not detected</td><td class="det">not detected</td></tr>
+</tbody>
+</table>
+
+<h2>Overhead (JSDOM, mean of 7 runs)</h2>
+<div class="grid2">
+  <div class="chartbox"><h3>Case 1 — Validation time (ms, log)</h3><canvas id="c1time"></canvas>
+    <p class="note">A1 baseline-naive (meta + querySelector), A2 baseline-optimized (meta + Map index), B proposed (registry).</p></div>
+  <div class="chartbox"><h3>Case 1 — Document payload (bytes)</h3><canvas id="c1pay"></canvas>
+    <p class="note">Registry keeps metadata outside the DOM, yielding a smaller serialized document.</p></div>
+  <div class="chartbox"><h3>Case 3 — Validation time (ms, log)</h3><canvas id="c3time"></canvas>
+    <p class="note">Snapshot-diff vs. identity continuity; comparable cost across node counts.</p></div>
+  <div class="chartbox"><h3>Case 4 — Reconstruction time (ms, log)</h3><canvas id="c4time"></canvas>
+    <p class="note">keyed reconcile and identity reconciliation share the same cost order.</p></div>
+  <div class="chartbox"><h3>Case 4 — Reconstruction payload (bytes)</h3><canvas id="c4pay"></canvas>
+    <p class="note">keyed and identity JSON payloads are nearly identical.</p></div>
+</div>
+
+<script>
+const P = { a:'#9aa0a6', b:'#2f6f9f', c:'#2da44e', d:'#d98a00' };
+const opt = (logY) => ({ responsive:true,
+  plugins:{ legend:{ labels:{ boxWidth:12, font:{size:11} } } },
+  scales:{ x:{ title:{display:true,text:'nodes'}, ticks:{font:{size:10}} },
+           y:{ type: logY?'logarithmic':'linear', ticks:{font:{size:10}} } } });
+const line = (id,labels,sets,logY) => new Chart(document.getElementById(id),
+  { type:'line', data:{ labels, datasets: sets.map(s=>({label:s.l,data:s.d,borderColor:s.c,backgroundColor:s.c,tension:.2})) }, options: opt(logY) });
+
+line('c1time',[10,50,100,200,500,1000,2000],[
+  {l:'A1 naive',c:P.a,d:[1.666,12.963,29.527,117.764,710.536,2871.937,null]},
+  {l:'A2 optimized',c:P.d,d:[0.03,0.332,0.418,0.148,1.193,1.939,7.638]},
+  {l:'B proposed',c:P.c,d:[0.011,0.031,0.028,0.617,0.871,1.066,8.573]},
+],true);
+
+line('c1pay',[10,50,100,200,500,1000,2000],[
+  {l:'Baseline (meta)',c:P.a,d:[964,4684,9334,19034,48134,96634,197634]},
+  {l:'Proposed (registry)',c:P.b,d:[534,2454,4854,9854,24854,49854,101854]},
+],false);
+
+line('c3time',[10,50,100,500,1000,2000],[
+  {l:'Snapshot-diff',c:P.a,d:[0.266,0.914,1.626,11.828,70.806,307.74]},
+  {l:'Identity continuity',c:P.c,d:[0.272,0.774,0.71,11.656,65.237,304.062]},
+],true);
+
+line('c4time',[10,50,100,500,1000,2000],[
+  {l:'innerHTML swap',c:P.a,d:[2.194,6.743,6.292,29.981,30.219,98.655]},
+  {l:'keyed reconcile',c:P.d,d:[2.807,3.035,8.66,63.968,164.224,986.002]},
+  {l:'identity reconciliation',c:P.c,d:[1.714,2.716,18.407,51.894,152.851,1095.087]},
+],true);
+
+line('c4pay',[10,50,100,500,1000,2000],[
+  {l:'innerHTML swap',c:P.a,d:[570,2930,5880,30280,60780,123780]},
+  {l:'keyed reconcile',c:P.d,d:[1114,5634,11284,57684,115684,234684]},
+  {l:'identity reconciliation',c:P.c,d:[1104,5584,11184,57184,114684,232684]},
+],false);
+</script>
+</body>
+</html>

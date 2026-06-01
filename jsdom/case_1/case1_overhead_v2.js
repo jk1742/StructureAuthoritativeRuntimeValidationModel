@@ -232,7 +232,7 @@ console.log(`  payload baseline   : ${lastP.baseline_bytes} B`);
 console.log(`  payload proposed   : ${lastP.proposed_bytes} B  (saving ${lastP.overhead_bytes} B = ${lastP.overhead_pct}% smaller)`);
 
 require("fs").writeFileSync(
-  "/home/claude/exp_case1/case1_overhead.json",
+  "./case1_overhead.json",
   JSON.stringify({ overhead: overheadRows, payload: payloadRows, repeat: REPEAT }, null, 2)
 );
-console.log("\nJSON result -> /home/claude/exp_case1/case1_overhead.json");
+console.log("\nJSON result -> ./case1_overhead.json");

@@ -175,7 +175,7 @@ console.log(`  Identity      validate : ${last.identity_validate_ms} ms (${last.
 console.log(`  Speedup of identity    : ${last.speedup_x}x`);
 
 require("fs").writeFileSync(
-  "/home/claude/exp_case1/case3_overhead.json",
+  "./case3_overhead.json",
   JSON.stringify(rows, null, 2)
 );
-console.log("\nJSON result -> /home/claude/exp_case1/case3_overhead.json");
+console.log("\nJSON result -> ./case3_overhead.json");

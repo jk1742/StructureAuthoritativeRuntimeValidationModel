@@ -310,7 +310,7 @@ console.log(`  keyed reconcile    : ${last.keyed_ms} ms / ${(lastP.keyed_bytes/1
 console.log(`  identity (proposed): ${last.identity_ms} ms / ${(lastP.identity_bytes/1000).toFixed(1)} KB`);
 
 require("fs").writeFileSync(
-  "/home/claude/exp_case1/case4_overhead.json",
+  "./case4_overhead.json",
   JSON.stringify({ time: rows, payload: payloadRows }, null, 2)
 );
-console.log("\nJSON result -> /home/claude/exp_case1/case4_overhead.json");
+console.log("\nJSON result -> ./case4_overhead.json");

@@ -1,18 +1,7 @@
-/**
- * 논문 6장 figure 생성기 (SVG, vector)
- * - case1_fig1_detection.svg : 탐지율 비교
- * - case1_fig2_validation_time.svg : 노드 수별 검증 시간 (log scale)
- * - case1_fig3_payload_size.svg : 노드 수별 문서 크기
- *
- * 출력 위치 : /home/claude/exp_case1/figures/
- *
- * SVG를 직접 생성하여 논문 출판에 적합한 벡터 형식으로 제공
- */
-
 const fs = require("fs");
 const path = require("path");
 
-const OUT_DIR = "/home/claude/exp_case1/figures";
+const OUT_DIR = "./figures";
 if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 
 // ============================================================

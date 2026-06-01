@@ -329,7 +329,7 @@ for (const r of results) {
 
 // JSON 결과도 함께 출력 (논문 표에 사용 가능)
 require("fs").writeFileSync(
-  "/home/claude/exp_case1/case1_result.json",
+  "./case1_result.json",
   JSON.stringify(results, null, 2)
 );
-console.log("\nJSON result -> /home/claude/exp_case1/case1_result.json");
+console.log("\nJSON result -> ./case1_result.json");

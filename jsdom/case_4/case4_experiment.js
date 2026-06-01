@@ -538,7 +538,7 @@ console.log(`  keyed reconcile    : ${r2[1].identityRespected ? "정상" : "FALS
 console.log(`  identity (proposed): ${r2[2].identityRespected ? "정상" : "FALSE REUSE"}`);
 
 require("fs").writeFileSync(
-  "/home/claude/exp_case1/case4_result.json",
+  "./case4_result.json",
   JSON.stringify(results, null, 2)
 );
-console.log("\nJSON result -> /home/claude/exp_case1/case4_result.json");
+console.log("\nJSON result -> ./case4_result.json");
