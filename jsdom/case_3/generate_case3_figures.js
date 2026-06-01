@@ -6,7 +6,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const OUT_DIR = "./figures";
+const OUT_DIR = ".";
 if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 
 function svgHeader(w, h, title, desc) {
