@@ -1,93 +1,10 @@
+<!-- detection_harness.html
+     Loaded by run_browser_detection.mjs in Chromium and Firefox.
+     It only hosts the scenario module; all logic lives in scenarios.mjs. -->
 <!doctype html>
-<html lang="en">
-<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Structure-Authoritative Runtime Validation — detection harness</title>
-<style>
-  :root { color-scheme: light dark; }
-  body { font-family: system-ui, -apple-system, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
-  h1 { font-size: 1.2rem; font-weight: 600; }
-  .lead { opacity: .75; }
-  .controls { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.2rem 0; }
-  button { font: inherit; padding: .45rem .9rem; border: 1px solid rgba(128,128,128,.6); border-radius: 6px; background: transparent; color: inherit; cursor: pointer; }
-  button:hover { border-color: rgba(128,128,128,1); }
-  #stage { border: 1px dashed rgba(128,128,128,.5); border-radius: 6px; padding: .5rem; min-height: 1.6rem; margin: 1rem 0; font-size: .85rem; opacity: .7; }
-  .result { border: 1px solid rgba(128,128,128,.4); border-radius: 8px; padding: .75rem 1rem; margin: .6rem 0; }
-  .result h2 { font-size: 1rem; margin: 0 0 .3rem; }
-  .verdict-pass { color: #2da44e; font-weight: 600; }
-  .verdict-fail { color: #e5484d; font-weight: 600; }
-  .meta { opacity: .7; font-size: .9rem; }
-  code { font-family: ui-monospace, monospace; }
-</style>
-</head>
+<title>Cross-environment detection harness</title>
 <body>
-  <h1>Structure-Authoritative Runtime Validation — detection harness</h1>
-  <p class="lead">Runs the proposed model (registry kept outside the DOM) against a live browser DOM.
-  Verdict: <code>Detected</code> means the model threw on a deviation; <code>not detected</code> means it returned VALID.</p>
-
-  <div class="controls">
-    <button data-run="all">Run all</button>
-    <button data-run="S4">S4 — evasion forgery</button>
-    <button data-run="T1">T1 — identical-form replacement</button>
-    <button data-run="control">control — valid state</button>
-  </div>
-
-  <div id="stage" aria-hidden="true">live DOM stage (scenarios mutate this region)</div>
-  <div id="output" role="status" aria-live="polite"></div>
-
-  <script type="module">
-    // Imports the experiment definitions. scenarios.mjs assigns
-    // window.__runDetectionExperiment (the contract run_browser_detection.mjs calls)
-    // and uses the #stage element above. model-core.mjs / scenarios.mjs are unchanged.
-    import "./scenarios.mjs";
-
-    const output = document.getElementById("output");
-
-    function isPass(r) {
-      const expectedDetected = r.expected === "Detected";
-      return r.detected === expectedDetected;
-    }
-
-    function renderOne(r) {
-      const pass = isPass(r);
-      const el = document.createElement("div");
-      el.className = "result";
-      el.innerHTML =
-        `<h2>${r.id}</h2>` +
-        `<div class="meta">${r.scenario}</div>` +
-        `<div>expected: <code>${r.expected}</code> &middot; ` +
-        `actual: <code>${r.detected ? "Detected" : "not detected"}</code> &middot; ` +
-        `<span class="${pass ? "verdict-pass" : "verdict-fail"}">${pass ? "PASS" : "FAIL"}</span></div>` +
-        `<div class="meta">${r.detail}</div>`;
-      return el;
-    }
-
-    function render(results) {
-      output.replaceChildren(...results.map(renderOne));
-    }
-
-    // Harness-side cleanup so repeated S4 runs do not pile up forged <meta> tags
-    // in <head>. Does not touch the model or scenario logic.
-    function clearForgedMeta() {
-      document.querySelectorAll('meta[name^="truth:"]').forEach((m) => m.remove());
-    }
-
-    async function run(which) {
-      clearForgedMeta();
-      const all = await window.__runDetectionExperiment();
-      render(which === "all" ? all : all.filter((r) => r.id === which));
-    }
-
-    for (const b of document.querySelectorAll("button[data-run]")) {
-      b.addEventListener("click", () => run(b.dataset.run));
-    }
-
-    // Auto mode for CI / headless / quick check: open with ?auto=1 to run all on load.
-    // (The Playwright runner does not need this; it calls window.__runDetectionExperiment directly.)
-    if (new URLSearchParams(location.search).get("auto") === "1") {
-      run("all");
-    }
-  </script>
+  <div id="stage"><!-- live DOM stage where scenarios mount/forge nodes --></div>
+  <script type="module" src="./scenarios.mjs"></script>
 </body>
-</html>
