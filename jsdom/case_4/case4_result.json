@@ -1,0 +1,44 @@
+[
+  {
+    "label": "R1-A",
+    "description": "innerHTML swap : runtime state preservation",
+    "preserved": false,
+    "maxlengthApplied": true,
+    "expected": "lost"
+  },
+  {
+    "label": "R1-B",
+    "description": "keyed reconcile : runtime state preservation",
+    "preserved": true,
+    "maxlengthApplied": true,
+    "expected": "preserved"
+  },
+  {
+    "label": "R1-C",
+    "description": "identity reconciliation : runtime state preservation",
+    "preserved": true,
+    "maxlengthApplied": true,
+    "expected": "preserved"
+  },
+  {
+    "label": "R2-A",
+    "description": "innerHTML swap : identity-aware reconstruction",
+    "valueAfter": "",
+    "identityRespected": true,
+    "outcome": "correctly_discarded"
+  },
+  {
+    "label": "R2-B",
+    "description": "keyed reconcile : identity-aware reconstruction",
+    "valueAfter": "user-typed-value",
+    "identityRespected": false,
+    "outcome": "incorrectly_preserved"
+  },
+  {
+    "label": "R2-C",
+    "description": "identity reconciliation : identity-aware reconstruction",
+    "valueAfter": "",
+    "identityRespected": true,
+    "outcome": "correctly_discarded"
+  }
+]

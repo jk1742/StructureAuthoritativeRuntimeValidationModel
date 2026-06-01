@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "T1: identical-form replacement",
+    "description": "subtree를 완전히 동일한 tag/value로 교체",
+    "snapshot_diff": {
+      "detected": false,
+      "mismatches": 0
+    },
+    "identity": {
+      "detected": true,
+      "issues": 1
+    }
+  },
+  {
+    "scenario": "T2: genuine no-op (control)",
+    "description": "변경 없음",
+    "snapshot_diff": {
+      "detected": false,
+      "mismatches": 0
+    },
+    "identity": {
+      "detected": false,
+      "issues": 0
+    }
+  },
+  {
+    "scenario": "T3: value mutation",
+    "description": "input.value direct alteration",
+    "snapshot_diff": {
+      "detected": true,
+      "mismatches": 1
+    },
+    "identity": {
+      "detected": true,
+      "issues": 1
+    }
+  },
+  {
+    "scenario": "T4: unauthorized structural insertion",
+    "description": "신규 input node 삽입",
+    "snapshot_diff": {
+      "detected": true,
+      "mismatches": 1
+    },
+    "identity": {
+      "detected": true,
+      "issues": 1
+    }
+  }
+]

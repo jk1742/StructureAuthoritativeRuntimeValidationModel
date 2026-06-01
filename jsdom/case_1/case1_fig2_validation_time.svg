@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" font-family="Helvetica, Arial, sans-serif" role="img">
+<title>Validation time vs node count</title>
+<desc>Line chart comparing validation time across node counts for baseline-naive, baseline-optimized, and proposed model on log scale</desc>
+<style>
+  .axis { stroke: #000; stroke-width: 1; fill: none; }
+  .grid { stroke: #DDD; stroke-width: 0.5; fill: none; }
+  .label { font-size: 12px; fill: #000; }
+  .tick { font-size: 11px; fill: #000; }
+  .title { font-size: 14px; font-weight: bold; fill: #000; }
+  .legend { font-size: 12px; fill: #000; }
+  .axis-label { font-size: 12px; fill: #000; }
+</style>
+<rect x="0" y="0" width="800" height="500" fill="#FFFFFF"/>
+<text x="400" y="30" text-anchor="middle" class="title">Fig. 2. Validation Time vs Node Count (log scale)</text>
+<line class="axis" x1="90" y1="390" x2="760" y2="390"/>
+<line class="axis" x1="90" y1="60" x2="90" y2="390"/>
+<line class="grid" x1="90" y1="390" x2="760" y2="390"/>
+<text x="82" y="394" text-anchor="end" class="tick">0.01 ms</text>
+<line class="grid" x1="90" y1="335" x2="760" y2="335"/>
+<text x="82" y="339" text-anchor="end" class="tick">0.1 ms</text>
+<line class="grid" x1="90" y1="280" x2="760" y2="280"/>
+<text x="82" y="284" text-anchor="end" class="tick">1 ms</text>
+<line class="grid" x1="90" y1="225" x2="760" y2="225"/>
+<text x="82" y="229" text-anchor="end" class="tick">10 ms</text>
+<line class="grid" x1="90" y1="170" x2="760" y2="170"/>
+<text x="82" y="174" text-anchor="end" class="tick">100 ms</text>
+<line class="grid" x1="90" y1="115" x2="760" y2="115"/>
+<text x="82" y="119" text-anchor="end" class="tick">1000 ms</text>
+<line class="grid" x1="90" y1="60" x2="760" y2="60"/>
+<text x="82" y="64" text-anchor="end" class="tick">10000 ms</text>
+<line class="grid" x1="90" y1="60" x2="90" y2="390"/>
+<text x="90" y="408" text-anchor="middle" class="tick">10</text>
+<line class="grid" x1="201.66666666666666" y1="60" x2="201.66666666666666" y2="390"/>
+<text x="201.66666666666666" y="408" text-anchor="middle" class="tick">50</text>
+<line class="grid" x1="313.3333333333333" y1="60" x2="313.3333333333333" y2="390"/>
+<text x="313.3333333333333" y="408" text-anchor="middle" class="tick">100</text>
+<line class="grid" x1="425" y1="60" x2="425" y2="390"/>
+<text x="425" y="408" text-anchor="middle" class="tick">200</text>
+<line class="grid" x1="536.6666666666666" y1="60" x2="536.6666666666666" y2="390"/>
+<text x="536.6666666666666" y="408" text-anchor="middle" class="tick">500</text>
+<line class="grid" x1="648.3333333333334" y1="60" x2="648.3333333333334" y2="390"/>
+<text x="648.3333333333334" y="408" text-anchor="middle" class="tick">1000</text>
+<line class="grid" x1="760" y1="60" x2="760" y2="390"/>
+<text x="760" y="408" text-anchor="middle" class="tick">2000</text>
+<text x="425" y="432" text-anchor="middle" class="axis-label">Number of registered nodes</text>
+<text x="20" y="225" text-anchor="middle" class="axis-label" transform="rotate(-90, 20, 225)">Validation time (ms)</text>
+<path d="M 90 267.80787516110775 L 201.66666666666666 218.80119634330094 L 313.3333333333333 199.13793717715487 L 425 166.0943098273577 L 536.6666666666666 123.1627652273873 L 648.3333333333334 89.80038001539214" fill="none" stroke="#666666" stroke-width="2" stroke-dasharray="6,4"/>
+<polygon points="90,261.80787516110775 85,271.80787516110775 95,271.80787516110775" fill="#666666" stroke="#000" stroke-width="0.5"/>
+<polygon points="201.66666666666666,212.80119634330094 196.66666666666666,222.80119634330094 206.66666666666666,222.80119634330094" fill="#666666" stroke="#000" stroke-width="0.5"/>
+<polygon points="313.3333333333333,193.13793717715487 308.3333333333333,203.13793717715487 318.3333333333333,203.13793717715487" fill="#666666" stroke="#000" stroke-width="0.5"/>
+<polygon points="425,160.0943098273577 420,170.0943098273577 430,170.0943098273577" fill="#666666" stroke="#000" stroke-width="0.5"/>
+<polygon points="536.6666666666666,117.1627652273873 531.6666666666666,127.1627652273873 541.6666666666666,127.1627652273873" fill="#666666" stroke="#000" stroke-width="0.5"/>
+<polygon points="648.3333333333334,83.80038001539214 643.3333333333334,93.80038001539214 653.3333333333334,93.80038001539214" fill="#666666" stroke="#000" stroke-width="0.5"/>
+<path d="M 90 363.7583309904186 L 201.66666666666666 306.337405396278 L 313.3333333333333 300.8353045023731 L 425 325.63560565327737 L 536.6666666666666 275.7847755981312 L 648.3333333333334 264.18322050067115 L 760 231.43611902794856" fill="none" stroke="#999999" stroke-width="2"/>
+<rect x="85" y="358.7583309904186" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="196.66666666666666" y="301.337405396278" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="308.3333333333333" y="295.8353045023731" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="420" y="320.63560565327737" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="531.6666666666666" y="270.7847755981312" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="643.3333333333334" y="259.18322050067115" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="755" y="226.43611902794856" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<path d="M 90 387.7234023162976 L 201.66666666666666 362.975106839115 L 313.3333333333333 365.4063082761779 L 425 291.5343159781717 L 536.6666666666666 283.2990014745785 L 648.3333333333334 278.4733537420195 L 760 228.6776946950296" fill="none" stroke="#222222" stroke-width="2"/>
+<circle cx="90" cy="387.7234023162976" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="201.66666666666666" cy="362.975106839115" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="313.3333333333333" cy="365.4063082761779" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="425" cy="291.5343159781717" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="536.6666666666666" cy="283.2990014745785" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="648.3333333333334" cy="278.4733537420195" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="760" cy="228.6776946950296" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<polygon points="117,452 112,462 122,462" fill="#666666" stroke="#000" stroke-width="0.5"/>
+<text x="132" y="462" class="legend">Baseline-naive (meta + querySelector)</text>
+<rect x="112" y="471" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<text x="132" y="480" class="legend">Baseline-optimized (meta + index)</text>
+<circle cx="117" cy="494" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<text x="132" y="498" class="legend">Proposed (registry)</text>
+</svg>

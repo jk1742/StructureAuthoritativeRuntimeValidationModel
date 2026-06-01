@@ -1,0 +1,62 @@
+[
+  {
+    "nodes": 10,
+    "snapshot_setup_ms": 0.274,
+    "identity_setup_ms": 0.265,
+    "snapshot_validate_ms": 0.266,
+    "identity_validate_ms": 0.272,
+    "snapshot_us_per_node": 26.618,
+    "identity_us_per_node": 27.167,
+    "speedup_x": 0.98
+  },
+  {
+    "nodes": 50,
+    "snapshot_setup_ms": 0.836,
+    "identity_setup_ms": 0.877,
+    "snapshot_validate_ms": 0.914,
+    "identity_validate_ms": 0.774,
+    "snapshot_us_per_node": 18.282,
+    "identity_us_per_node": 15.474,
+    "speedup_x": 1.18
+  },
+  {
+    "nodes": 100,
+    "snapshot_setup_ms": 2.375,
+    "identity_setup_ms": 0.672,
+    "snapshot_validate_ms": 1.626,
+    "identity_validate_ms": 0.71,
+    "snapshot_us_per_node": 16.265,
+    "identity_us_per_node": 7.095,
+    "speedup_x": 2.29
+  },
+  {
+    "nodes": 500,
+    "snapshot_setup_ms": 11.415,
+    "identity_setup_ms": 11.963,
+    "snapshot_validate_ms": 11.828,
+    "identity_validate_ms": 11.656,
+    "snapshot_us_per_node": 23.656,
+    "identity_us_per_node": 23.313,
+    "speedup_x": 1.01
+  },
+  {
+    "nodes": 1000,
+    "snapshot_setup_ms": 82.699,
+    "identity_setup_ms": 74.024,
+    "snapshot_validate_ms": 70.806,
+    "identity_validate_ms": 65.237,
+    "snapshot_us_per_node": 70.806,
+    "identity_us_per_node": 65.237,
+    "speedup_x": 1.09
+  },
+  {
+    "nodes": 2000,
+    "snapshot_setup_ms": 352.841,
+    "identity_setup_ms": 323.874,
+    "snapshot_validate_ms": 307.74,
+    "identity_validate_ms": 304.062,
+    "snapshot_us_per_node": 153.87,
+    "identity_us_per_node": 152.031,
+    "speedup_x": 1.01
+  }
+]

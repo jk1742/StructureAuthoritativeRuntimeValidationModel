@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" font-family="Helvetica, Arial, sans-serif" role="img">
+<title>Forgery detection result per scenario</title>
+<desc>Bar chart comparing baseline meta tag model and proposed registry model across six forgery scenarios</desc>
+<style>
+  .axis { stroke: #000; stroke-width: 1; fill: none; }
+  .grid { stroke: #DDD; stroke-width: 0.5; fill: none; }
+  .label { font-size: 12px; fill: #000; }
+  .tick { font-size: 11px; fill: #000; }
+  .title { font-size: 14px; font-weight: bold; fill: #000; }
+  .legend { font-size: 12px; fill: #000; }
+  .axis-label { font-size: 12px; fill: #000; }
+</style>
+<rect x="0" y="0" width="800" height="480" fill="#FFFFFF"/>
+<text x="400" y="30" text-anchor="middle" class="title">Fig. 1. Forgery Detection Result per Scenario</text>
+<line class="axis" x1="100" y1="380" x2="760" y2="380"/>
+<line class="axis" x1="100" y1="60" x2="100" y2="380"/>
+<line class="grid" x1="100" y1="380" x2="760" y2="380"/>
+<text x="92" y="384" text-anchor="end" class="tick">Bypassed</text>
+<line class="grid" x1="100" y1="60" x2="760" y2="60"/>
+<text x="92" y="64" text-anchor="end" class="tick">Detected</text>
+<defs>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#FFF"/>
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#000" stroke-width="1"/>
+    </pattern>
+  </defs>
+<rect x="114.5" y="60" width="38.5" height="320" fill="#999999" stroke="#000" stroke-width="1"/>
+<rect x="157" y="60" width="38.5" height="320" fill="#222222" stroke="#000" stroke-width="1"/>
+<text x="155" y="398" text-anchor="middle" class="tick">S1</text>
+<text x="155" y="412" text-anchor="middle" class="tick" fill="#555">input.value</text>
+<rect x="224.5" y="60" width="38.5" height="320" fill="#999999" stroke="#000" stroke-width="1"/>
+<rect x="267" y="60" width="38.5" height="320" fill="#222222" stroke="#000" stroke-width="1"/>
+<text x="265" y="398" text-anchor="middle" class="tick">S2</text>
+<text x="265" y="412" text-anchor="middle" class="tick" fill="#555">checkbox.checked</text>
+<rect x="334.5" y="60" width="38.5" height="320" fill="#999999" stroke="#000" stroke-width="1"/>
+<rect x="377" y="60" width="38.5" height="320" fill="#222222" stroke="#000" stroke-width="1"/>
+<text x="375" y="398" text-anchor="middle" class="tick">S3</text>
+<text x="375" y="412" text-anchor="middle" class="tick" fill="#555">textarea.value</text>
+<rect x="444.5" y="354" width="38.5" height="26" fill="url(#hatch)" stroke="#000" stroke-width="1"/>
+<text x="463.75" y="348" text-anchor="middle" class="tick" font-weight="bold">✗</text>
+<rect x="487" y="60" width="38.5" height="320" fill="#222222" stroke="#000" stroke-width="1"/>
+<text x="485" y="398" text-anchor="middle" class="tick">S4-a</text>
+<text x="485" y="412" text-anchor="middle" class="tick" fill="#555">meta+value</text>
+<rect x="554.5" y="354" width="38.5" height="26" fill="url(#hatch)" stroke="#000" stroke-width="1"/>
+<text x="573.75" y="348" text-anchor="middle" class="tick" font-weight="bold">✗</text>
+<rect x="597" y="60" width="38.5" height="320" fill="#222222" stroke="#000" stroke-width="1"/>
+<text x="595" y="398" text-anchor="middle" class="tick">S4-b</text>
+<text x="595" y="412" text-anchor="middle" class="tick" fill="#555">meta+checked</text>
+<rect x="664.5" y="354" width="38.5" height="26" fill="url(#hatch)" stroke="#000" stroke-width="1"/>
+<text x="683.75" y="348" text-anchor="middle" class="tick" font-weight="bold">✗</text>
+<rect x="707" y="60" width="38.5" height="320" fill="#222222" stroke="#000" stroke-width="1"/>
+<text x="705" y="398" text-anchor="middle" class="tick">S4-c</text>
+<text x="705" y="412" text-anchor="middle" class="tick" fill="#555">meta+textarea</text>
+<rect x="120" y="445" width="14" height="14" fill="#999999" stroke="#000"/>
+<text x="140" y="457" class="legend">Baseline (meta tag)</text>
+<rect x="320" y="445" width="14" height="14" fill="#222222" stroke="#000"/>
+<text x="340" y="457" class="legend">Proposed (registry)</text>
+</svg>

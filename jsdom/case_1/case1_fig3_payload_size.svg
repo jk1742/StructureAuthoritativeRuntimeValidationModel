@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="460" viewBox="0 0 800 460" font-family="Helvetica, Arial, sans-serif" role="img">
+<title>Document payload size vs node count</title>
+<desc>Line chart comparing document payload size in bytes between baseline (with meta tags) and proposed (no in-DOM metadata) across node counts</desc>
+<style>
+  .axis { stroke: #000; stroke-width: 1; fill: none; }
+  .grid { stroke: #DDD; stroke-width: 0.5; fill: none; }
+  .label { font-size: 12px; fill: #000; }
+  .tick { font-size: 11px; fill: #000; }
+  .title { font-size: 14px; font-weight: bold; fill: #000; }
+  .legend { font-size: 12px; fill: #000; }
+  .axis-label { font-size: 12px; fill: #000; }
+</style>
+<rect x="0" y="0" width="800" height="460" fill="#FFFFFF"/>
+<text x="400" y="30" text-anchor="middle" class="title">Fig. 3. Document Payload Size vs Node Count</text>
+<line class="axis" x1="90" y1="360" x2="760" y2="360"/>
+<line class="axis" x1="90" y1="60" x2="90" y2="360"/>
+<line class="grid" x1="90" y1="360" x2="760" y2="360"/>
+<text x="82" y="364" text-anchor="end" class="tick">0 KB</text>
+<line class="grid" x1="90" y1="285" x2="760" y2="285"/>
+<text x="82" y="289" text-anchor="end" class="tick">50 KB</text>
+<line class="grid" x1="90" y1="210" x2="760" y2="210"/>
+<text x="82" y="214" text-anchor="end" class="tick">100 KB</text>
+<line class="grid" x1="90" y1="135" x2="760" y2="135"/>
+<text x="82" y="139" text-anchor="end" class="tick">150 KB</text>
+<line class="grid" x1="90" y1="60" x2="760" y2="60"/>
+<text x="82" y="64" text-anchor="end" class="tick">200 KB</text>
+<text x="90" y="378" text-anchor="middle" class="tick">10</text>
+<text x="201.66666666666666" y="378" text-anchor="middle" class="tick">50</text>
+<text x="313.3333333333333" y="378" text-anchor="middle" class="tick">100</text>
+<text x="425" y="378" text-anchor="middle" class="tick">200</text>
+<text x="536.6666666666666" y="378" text-anchor="middle" class="tick">500</text>
+<text x="648.3333333333334" y="378" text-anchor="middle" class="tick">1000</text>
+<text x="760" y="378" text-anchor="middle" class="tick">2000</text>
+<text x="425" y="402" text-anchor="middle" class="axis-label">Number of registered nodes</text>
+<text x="20" y="210" text-anchor="middle" class="axis-label" transform="rotate(-90, 20, 210)">Document payload size</text>
+<path d="M 90 358.554 L 201.66666666666666 352.974 L 313.3333333333333 345.999 L 425 331.449 L 536.6666666666666 287.799 L 648.3333333333334 215.049 L 760 63.54899999999998" fill="none" stroke="#999999" stroke-width="2"/>
+<rect x="85" y="353.554" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="196.66666666666666" y="347.974" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="308.3333333333333" y="340.999" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="420" y="326.449" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="531.6666666666666" y="282.799" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="643.3333333333334" y="210.049" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<rect x="755" y="58.54899999999998" width="10" height="10" fill="#999999" stroke="#000" stroke-width="0.5"/>
+<path d="M 90 359.199 L 201.66666666666666 356.319 L 313.3333333333333 352.719 L 425 345.219 L 536.6666666666666 322.719 L 648.3333333333334 285.219 L 760 207.219" fill="none" stroke="#222222" stroke-width="2"/>
+<circle cx="90" cy="359.199" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="201.66666666666666" cy="356.319" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="313.3333333333333" cy="352.719" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="425" cy="345.219" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="536.6666666666666" cy="322.719" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="648.3333333333334" cy="285.219" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<circle cx="760" cy="207.219" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<rect x="110" y="420" width="14" height="14" fill="#999999" stroke="#000"/>
+<text x="130" y="432" class="legend">Baseline (with meta tags)</text>
+<circle cx="347" cy="427" r="5" fill="#222222" stroke="#000" stroke-width="0.5"/>
+<text x="362" y="432" class="legend">Proposed (no in-DOM metadata)</text>
+</svg>

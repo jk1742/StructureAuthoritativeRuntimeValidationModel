@@ -1,0 +1,646 @@
+<!--
+  Chapter 6 - Experimental Evaluation
+  Case 1 : Runtime State Forgery Detection
+  Style  : Bulma HTML (matches FrameCover.js)
+
+  본 문서는 논문 6장의 Case 1 부분만 다룬다.
+  후속 케이스 (MutationObserver 부분 동작 가정, Virtual DOM 유사구현,
+  Proposed 단독 성능, Serialized truth state) 는 별도 작성 예정.
+
+  Figures referenced:
+    - /assets/intro/cover/case1_fig1_detection.svg
+    - /assets/intro/cover/case1_fig2_validation_time.svg
+    - /assets/intro/cover/case1_fig3_payload_size.svg
+-->
+<div class="content" data-class="frame-cover-chapter-6" data-role="frame">
+
+  <h2 class="title is-4">6. Experimental Evaluation</h2>
+
+  <h3 class="title is-5">6.1 Experimental Environment</h3>
+  <p>
+  실험은 동일한 browser runtime 환경에서 input property mutation, unauthorized DOM insertion, sibling order corruption 시나리오를 기준으로 수행한다.
+  본 장에서는 그 중 첫 번째 케이스인 <strong>Runtime State Forgery Detection</strong>을 다룬다.
+  실험은 Node.js v22 환경에서 JSDOM v25 기반의 browser-like runtime 위에서 수행하였으며, validation time 측정은 <code>performance.now()</code> high-resolution timer를 사용하였다.
+  각 측정 항목은 warmup 2회, 본 측정 7회 평균을 사용하였다.
+  </p>
+
+  <h3 class="title is-5">6.2 Case 1 : Runtime State Forgery Detection</h3>
+  <p>
+  본 케이스는 3.3절 Runtime State Forgery Boundary에서 제안한 검증 모델이, DOM 내부에 validation metadata를 삽입하는 기존 접근과 비교하여
+  외부 mutation에 대한 분리 효과를 가지는지를 검증한다.
+  </p>
+
+  <h3 class="subtitle is-5">6.2.1 Compared Models</h3>
+  <p>
+  실험은 두 가지 비교 대상 모델과 한 가지 제안 모델로 구성된다.
+  </p>
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Truth 저장 위치</th>
+          <th>검증 방식</th>
+          <th>Trust surface</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A1. Baseline-naive</td>
+          <td><code>&lt;meta name="truth:{id}" content="..."&gt;</code> (DOM 내부)</td>
+          <td>매 검증마다 <code>querySelector</code>로 meta lookup</td>
+          <td>Untrusted (DOM mutable surface)</td>
+        </tr>
+        <tr>
+          <td>A2. Baseline-optimized</td>
+          <td><code>&lt;meta&gt;</code> (DOM 내부) + 외부 <code>Map&lt;id,meta&gt;</code> index</td>
+          <td>Map index 통한 O(1) lookup 후 meta content 비교</td>
+          <td>Untrusted (저장 위치 자체는 DOM 위)</td>
+        </tr>
+        <tr>
+          <td>B. Proposed</td>
+          <td><code>indexMap</code>(id → entity.truth) + <code>WeakNodeMap</code>(node → id), DOM 외부 closure</td>
+          <td>node → WeakNodeMap → indexMap → entity.truth 비교</td>
+          <td>Trusted (DOM 외부 registry)</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-1. Case 1 비교 모델 구성</figcaption>
+  </figure>
+
+  <p>
+  여기서 한 가지 짚어야 할 점이 있다. Baseline 계열 모델은 <code>&lt;meta&gt;</code> tag를 노드 수만큼 추가로 생성해야 한다.
+  이는 baseline의 단순한 구현 한계가 아니라 <em>DOM 내부에 진실값을 두는 모든 접근이 공유하는 구조적 비용</em>이다.
+  Hidden input, <code>data-*</code> attribute, comment node 등 어떤 저장 방식을 선택해도 본질적인 비용 구조는 동일하다.
+  따라서 본 비교는 baseline에 본래 존재하지 않는 부담을 임의로 부과한 것이 아니라, 해당 접근 방식이 본질적으로 가지는 비용을 그대로 측정한 결과이다.
+  </p>
+
+  <h3 class="subtitle is-5">6.2.2 Attack Scenarios</h3>
+  <p>
+  공격자는 browser console 또는 injected script를 통해 DOM property를 직접 변경할 수 있다고 가정한다.
+  본 케이스에서는 다음 네 가지 forgery 시나리오를 정의한다.
+  </p>
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Scenario</th>
+          <th>Attack action</th>
+          <th>회피 의도</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>S1</td>
+          <td>input.value forgery</td>
+          <td><code>input.value = "attacker"</code></td>
+          <td>없음 (단순 변조)</td>
+        </tr>
+        <tr>
+          <td>S2</td>
+          <td>checkbox.checked forgery</td>
+          <td><code>checkbox.checked = true</code></td>
+          <td>없음 (단순 변조)</td>
+        </tr>
+        <tr>
+          <td>S3</td>
+          <td>textarea.value forgery</td>
+          <td><code>textarea.value = "INJECTED"</code></td>
+          <td>없음 (단순 변조)</td>
+        </tr>
+        <tr>
+          <td>S4</td>
+          <td>Evasion forgery</td>
+          <td>property 변조 + <code>meta.setAttribute("content", ...)</code> 동시 위조</td>
+          <td>DOM 내부 검증 기준(meta)을 함께 위조하여 단순 equality 검사 우회</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-2. Forgery 공격 시나리오</figcaption>
+  </figure>
+
+  <p>
+  S1~S3은 property를 직접 변경하는 가장 단순한 공격이며, 정상 interaction lifecycle을 거치지 않는다.
+  S4는 본 모델이 식별 대상으로 삼는 핵심 위협이다. 검증 기준이 DOM 위에 존재한다면 공격자는 진실값 자체도 위조할 수 있으며,
+  이 경우 <code>dom value === truth value</code>가 성립해 단순 equality 검사는 통과한다.
+  </p>
+
+  <h3 class="subtitle is-5">6.2.3 Detection Result</h3>
+  <p>
+  여섯 개의 시나리오 인스턴스 (S1, S2, S3, S4-a/b/c) 각각에 대해 두 모델의 탐지 결과를 측정하였다.
+  </p>
+  <figure>
+    <img src="/assets/intro/cover/case1_fig1_detection.svg" alt="Fig.1 Forgery Detection Result per Scenario" />
+    <figcaption>
+      Fig. 1. Forgery detection result per scenario. Baseline은 S4 evasion에서 모두 우회되었고, Proposed는 모든 시나리오에서 탐지하였다.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Attack</th>
+          <th>Baseline (meta tag)</th>
+          <th>Proposed (registry)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>S1</td><td>input.value direct forgery</td><td>Detected</td><td>Detected</td></tr>
+        <tr><td>S2</td><td>checkbox.checked direct forgery</td><td>Detected</td><td>Detected</td></tr>
+        <tr><td>S3</td><td>textarea.value direct forgery</td><td>Detected</td><td>Detected</td></tr>
+        <tr><td>S4-a</td><td>input.value + meta both</td><td><strong>Bypassed</strong></td><td>Detected</td></tr>
+        <tr><td>S4-b</td><td>checkbox.checked + meta both</td><td><strong>Bypassed</strong></td><td>Detected</td></tr>
+        <tr><td>S4-c</td><td>textarea.value + meta both</td><td><strong>Bypassed</strong></td><td>Detected</td></tr>
+        <tr>
+          <td colspan="2"><strong>Detection rate</strong></td>
+          <td><strong>3 / 6 (50.0%)</strong></td>
+          <td><strong>6 / 6 (100.0%)</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-3. 시나리오별 forgery 탐지 결과</figcaption>
+  </figure>
+
+  <p>
+  S1~S3과 같은 단순 forgery는 두 모델 모두에서 탐지되었다.
+  진실값과 현재값이 서로 다르기 때문에 검증 기준의 위치와 무관하게 equality 검사만으로도 차이가 드러난다.
+  그러나 S4 evasion에서는 두 모델의 결과가 명확하게 갈렸다.
+  Baseline은 meta tag 자체가 DOM의 mutable execution surface 위에 위치하므로, 공격자가
+  <code>setAttribute("content", ...)</code>를 통해 meta tag를 함께 위조할 수 있다.
+  그 결과 <code>node.value</code>와 <code>meta.content</code>가 동일해져 검증을 통과해 버린다 (Bypassed).
+  반면 Proposed 모델의 <code>indexMap</code>과 <code>WeakNodeMap</code>은 application 내부 closure scope에 위치하므로
+  외부 script가 직접 손댈 수 없는 영역이며, DOM mutation API만으로는 진실값이 오염되지 않는다.
+  </p>
+
+  <h3 class="subtitle is-5">6.2.4 Runtime Overhead - Validation Time</h3>
+  <p>
+  3.3절은 Proposed 모델이 외부 registry lookup을 추가로 수행함을 명시한다.
+  본 절에서는 노드 수가 증가함에 따라 두 baseline 모델과 Proposed 모델의 검증 비용이 어떻게 변화하는지 측정한다.
+  실험은 10, 50, 100, 200, 500, 1000, 2000 개의 input node를 등록한 동일한 form 구조 위에서 수행되었다.
+  </p>
+
+  <figure>
+    <img src="/assets/intro/cover/case1_fig2_validation_time.svg" alt="Fig.2 Validation Time vs Node Count" />
+    <figcaption>
+      Fig. 2. Validation time vs node count (log scale). Baseline-naive는 매 검증마다
+      <code>querySelector</code>를 호출하므로 O(N²) 패턴으로 폭증한다.
+      Baseline-optimized와 Proposed는 두 모델 모두 사전 인덱싱을 사용하며 유사한 선형 비용 곡선을 보인다.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>Nodes</th>
+          <th>A1 Naive (ms)</th>
+          <th>A2 Optimized (ms)</th>
+          <th>B Proposed (ms)</th>
+          <th>A2 µs/node</th>
+          <th>B µs/node</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10</td><td>1.666</td><td>0.030</td><td>0.011</td><td>2.97</td><td>1.13</td></tr>
+        <tr><td>50</td><td>12.963</td><td>0.332</td><td>0.031</td><td>6.64</td><td>0.62</td></tr>
+        <tr><td>100</td><td>29.527</td><td>0.418</td><td>0.028</td><td>4.18</td><td>0.28</td></tr>
+        <tr><td>200</td><td>117.764</td><td>0.148</td><td>0.617</td><td>0.74</td><td>3.09</td></tr>
+        <tr><td>500</td><td>710.536</td><td>1.193</td><td>0.871</td><td>2.39</td><td>1.74</td></tr>
+        <tr><td>1000</td><td>2871.937</td><td>1.939</td><td>1.066</td><td>1.94</td><td>1.07</td></tr>
+        <tr><td>2000</td><td>(skipped)</td><td>7.638</td><td>8.573</td><td>3.82</td><td>4.29</td></tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-4. 노드 수별 검증 시간 (7회 평균, 단위 ms / µs)</figcaption>
+  </figure>
+
+  <p>
+  Baseline-naive는 <code>querySelector</code>가 검증 호출마다 전체 문서를 스캔하므로 노드 수에 따라 O(N²) 패턴으로 폭증한다.
+  1,000 노드에서 약 2.87초가 소요되어 본 실험의 범위에서는 2,000 노드 측정을 생략하였다.
+  단, 이는 baseline 모델 자체의 본질적 한계가 아니라 단순한 구현 선택의 결과임을 명시한다.
+  </p>
+  <p>
+  보다 공정한 비교는 사전 인덱싱을 사용하는 Baseline-optimized와 Proposed 사이에서 이루어진다.
+  두 모델은 2,000 노드 기준 각각 <strong>7.6 ms와 8.6 ms</strong>로 측정되었으며 약 <strong>12%의 추가 비용</strong>이 관찰되었다.
+  이는 Proposed 모델이 <code>WeakNodeMap.get</code> 단계를 한 번 더 거치기 때문이며, 모든 측정 구간에서 두 모델은 동일한 O(N) 차수를 유지한다.
+  결과적으로 검증 시간 관점에서 Proposed의 추가 비용은 작고 예측 가능한 수준이다.
+  </p>
+
+  <h3 class="subtitle is-5">6.2.5 Runtime Overhead - Document Payload Size</h3>
+  <p>
+  Proposed 모델이 DOM 내부에 metadata를 삽입하지 않는다는 점은 직렬화된 문서의 크기에도 직접적으로 반영된다.
+  동일한 노드 수 조건에서 baseline은 <code>&lt;meta&gt;</code> tag를 추가로 포함해야 하므로 노드 수에 비례한 추가 payload가 발생한다.
+  </p>
+
+  <figure>
+    <img src="/assets/intro/cover/case1_fig3_payload_size.svg" alt="Fig.3 Document Payload Size vs Node Count" />
+    <figcaption>
+      Fig. 3. Document payload size vs node count. Baseline은 노드당 약 47~48 bytes의 meta tag overhead가 누적된다.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>Nodes</th>
+          <th>Baseline (B)</th>
+          <th>Proposed (B)</th>
+          <th>Saving (B)</th>
+          <th>Saving (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10</td><td>964</td><td>534</td><td>430</td><td>80.5%</td></tr>
+        <tr><td>50</td><td>4,684</td><td>2,454</td><td>2,230</td><td>90.9%</td></tr>
+        <tr><td>100</td><td>9,334</td><td>4,854</td><td>4,480</td><td>92.3%</td></tr>
+        <tr><td>200</td><td>19,034</td><td>9,854</td><td>9,180</td><td>93.2%</td></tr>
+        <tr><td>500</td><td>48,134</td><td>24,854</td><td>23,280</td><td>93.7%</td></tr>
+        <tr><td>1,000</td><td>96,634</td><td>49,854</td><td>46,780</td><td>93.8%</td></tr>
+        <tr><td>2,000</td><td>197,634</td><td>101,854</td><td>95,780</td><td>94.0%</td></tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-5. 노드 수별 직렬화 문서 크기</figcaption>
+  </figure>
+
+  <p>
+  Baseline은 노드 수가 증가할수록 payload overhead가 수렴적으로 약 94% 수준에 도달한다.
+  이는 노드당 약 47~48 bytes의 <code>&lt;meta&gt;</code> 선언이 누적된 결과이며,
+  네트워크 전송 비용과 초기 parse cost 양쪽에 비례한 부담이 된다.
+  Proposed 모델은 진실값을 application 메모리에 보관하므로 직렬화 문서에는 추가 비용이 발생하지 않는다.
+  </p>
+
+  <h3 class="subtitle is-5">6.2.6 Discussion</h3>
+  <p>
+  본 케이스의 결과는 세 가지 관점에서 정리할 수 있다.
+  </p>
+
+  <ul>
+    <li>
+      <strong>Forgery detection</strong> : Baseline 50.0%, Proposed 100.0%.
+      단순 forgery는 두 모델 모두 탐지 가능하지만, evasion forgery에서는 검증 기준이 DOM 위에 있는 baseline이 우회된다.
+      이는 3.3절이 명시한 <em>"검증 기준이 DOM과 동일한 mutation surface에 놓이는 경우의 한계"</em>가 실제로 발현된 결과이다.
+    </li>
+    <li>
+      <strong>Validation time</strong> : 사전 인덱싱을 사용하는 baseline 대비 Proposed는 약 12% 추가 비용을 보인다.
+      두 모델 모두 O(N) 차수를 유지하며, registry lookup으로 인한 비용은 작고 예측 가능한 수준이다.
+    </li>
+    <li>
+      <strong>Payload size</strong> : Proposed는 baseline 대비 약 94% 작은 문서 크기를 유지한다.
+      이는 DOM 내부에 검증 metadata를 삽입하지 않는다는 본 모델의 구조적 선택이 직렬화 단계에서도 그대로 반영됨을 보여준다.
+    </li>
+  </ul>
+
+  <p>
+  종합하면, Proposed 모델은 baseline 대비 <em>payload는 줄이고(saving), 검증 비용은 거의 동등(parity)하며, 보안성은 향상(gain)</em>되는
+  trade-off를 가진다.
+  </p>
+
+  <h3 class="subtitle is-5">6.2.7 Validity and Threats to Validity</h3>
+  <p>
+  본 케이스의 실험 결과를 해석할 때 다음과 같은 한계를 함께 고려해야 한다.
+  </p>
+  <ul>
+    <li>
+      <strong>Baseline 저장 매체의 일반성</strong>:
+      본 실험은 진실값 저장 매체로 <code>&lt;meta&gt;</code> tag를 사용하였다.
+      Hidden input, <code>data-*</code> attribute, comment node 등 다른 매체를 사용하더라도 모두 DOM mutable surface 위에 위치하므로
+      S4 evasion에 대한 결과는 동일할 것으로 예상되지만, 본 실험은 직접 측정하지 않았다.
+    </li>
+    <li>
+      <strong>공격자 가정의 단계성</strong>:
+      S4 evasion은 공격자가 검증 구조를 알고 있다고 가정한다.
+      DOM 내부 metadata는 외부 script에서 전부 읽을 수 있으므로 이 가정은 Kerckhoffs 원칙 관점에서 합리적이다.
+      그러나 closure scope의 registry 역시 prototype pollution이나 module loader 단계의 공격에는 노출될 수 있으며,
+      이는 본 모델의 trust assumption 안에서는 application runtime을 trusted로 가정하는 것에 의존한다.
+    </li>
+    <li>
+      <strong>측정 환경의 외부 타당성</strong>:
+      본 실험은 JSDOM 환경에서 수행되었다. 실제 브라우저 환경의 layout, reflow, GC 영향과는 차이가 있을 수 있다.
+      다만 두 모델 모두 동일한 환경에서 측정되었으므로 상대 비교의 의미는 유지된다.
+    </li>
+    <li>
+      <strong>단일 케이스의 일반화 한계</strong>:
+      본 케이스는 단일 검증 기준이 DOM 외부에 위치할 때의 효과를 보였을 뿐, 본 모델이 모든 공격에 대해 강건함을 보인 것은 아니다.
+      후속 케이스에서 MutationObserver 기반 접근, Virtual DOM 유사구현, Proposed 모델 단독 평가, 그리고 진실값 state의 server-client serialization 환경
+      에 대한 추가 실험을 수행한다.
+    </li>
+  </ul>
+
+  <h3 class="subtitle is-5">6.2.8 Reproducibility</h3>
+  <p>
+  본 케이스의 실험에 사용한 소스 코드, 측정 결과 JSON, 그리고 figure 생성 스크립트는 다음 파일들로 제공된다.
+  </p>
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>파일</th>
+          <th>설명</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>case1_experiment.js</code></td>
+          <td>6.2.3 detection 실험 코드 (S1~S4 시나리오)</td>
+        </tr>
+        <tr>
+          <td><code>case1_overhead_v2.js</code></td>
+          <td>6.2.4 / 6.2.5 overhead 실험 코드 (3가지 모델 fair comparison)</td>
+        </tr>
+        <tr>
+          <td><code>case1_result.json</code></td>
+          <td>detection 측정 raw 결과</td>
+        </tr>
+        <tr>
+          <td><code>case1_overhead.json</code></td>
+          <td>overhead 측정 raw 결과</td>
+        </tr>
+        <tr>
+          <td><code>generate_figures_svg.js</code></td>
+          <td>Fig.1~3 SVG 생성 스크립트</td>
+        </tr>
+        <tr>
+          <td><code>figures/case1_fig1_detection.svg</code></td>
+          <td>Fig.1 vector image</td>
+        </tr>
+        <tr>
+          <td><code>figures/case1_fig2_validation_time.svg</code></td>
+          <td>Fig.2 vector image</td>
+        </tr>
+        <tr>
+          <td><code>figures/case1_fig3_payload_size.svg</code></td>
+          <td>Fig.3 vector image</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-6. Case 1 재현 자료 목록</figcaption>
+
+  <!-- ============================================================ -->
+  <!-- Case 2                                                       -->
+  <!-- ============================================================ -->
+  <h3 class="title is-5">6.3 Case 2 : MutationObserver Baseline (Comment)</h3>
+  <p>
+  MutationObserver(이하 MO)는 DOM tree와 attribute 변경을 변경 시점에 표적 감시할 수 있는 browser 내장 API이다.
+  변경된 객체만 callback으로 전달되므로 전체 트리를 매번 비교하는 방식 대비 성능 측면에서 분명한 우위를 가진다.
+  본 케이스에서는 이러한 성능 우위를 인정하되, MO가 본 모델이 제안하는 분리 효과를 제공할 수 없는 이유를 정리한다.
+  성능 비교 실험은 수행하지 않으며, 회피 시나리오 한 가지로 한계를 보인다.
+  </p>
+
+  <h3 class="subtitle is-5">6.3.1 MutationObserver Bypass Scenario</h3>
+  <p>
+  MO는 application 내부 API가 아니라 browser가 외부 script에도 동일하게 노출하는 표준 API이다.
+  공격자는 동일한 권한으로 다음과 같이 감시 자체를 중단할 수 있다.
+  </p>
+  <pre><code class="language-js">
+  // application setup
+  const obs = new MutationObserver((records) =&gt; {
+      // detect property mutation
+  });
+  obs.observe(input, { attributes: true, attributeFilter: ["value"] });
+
+  // attacker script (same browser runtime)
+  obs.disconnect();              // 감시 중단
+  input.value = "attacker";      // 변조 (기록 누락)
+  obs.observe(input, { attributes: true, attributeFilter: ["value"] });
+                                 // 재감시 등록 시점부터 다시 정상 동작
+  </code></pre>
+
+  <p>
+  공격자가 application 내부의 <code>obs</code> 참조를 획득하지 못하더라도,
+  <code>MutationObserver.prototype.disconnect</code>를 통한 일괄 회피가 가능하며,
+  callback function 자체를 <code>Function.prototype</code> 또는 <code>MutationObserver</code> 생성자 단계에서 가로채는 방식도 가능하다.
+  보다 본질적인 한계는 이러한 구체적 회피 기법의 존재 여부가 아니라, <strong>MO가 신뢰 기반을 DOM mutation surface 자체에 두고 있다는 점</strong>이다.
+  </p>
+
+  <h3 class="subtitle is-5">6.3.2 Conclusion on Case 2</h3>
+  <p>
+  MO는 변경 시점에 표적 감시가 가능하므로 성능 측면의 우위는 분명하다.
+  그러나 MO 자체가 DOM과 동일한 mutation surface 위에서 동작하는 API이며, 검증 기준 역시 DOM 위에 머무른다.
+  따라서 6.2의 Baseline (meta tag) 모델과 동일한 trust boundary 문제를 공유하며, 본 모델이 제안하는 DOM-외부 validation reference layer의 분리 효과를 대체할 수 없다.
+  이러한 이유로 본 케이스는 정량 성능 비교 대상에서 제외하였다.
+  </p>
+
+  <!-- ============================================================ -->
+  <!-- Case 3                                                       -->
+  <!-- ============================================================ -->
+  <h3 class="title is-5">6.4 Case 3 : Snapshot Diff vs Identity Continuity</h3>
+  <p>
+  본 케이스는 본 모델의 <strong>identity continuity</strong> 개념(3.2절 stale subtree 정의 참고)이 기존 snapshot 기반 접근으로는 식별하기 어려운 상황을 탐지할 수 있음을 보인다.
+  비교 대상은 단순 snapshot diff 방식으로, Virtual DOM reconcile의 가장 기본적인 형태이다.
+  본 실험에서는 구조적으로 최소한의 두 모델만 사용하며, framework-specific 최적화 계층은 사용하지 않는다.
+  </p>
+
+  <h3 class="subtitle is-5">6.4.1 Compared Models</h3>
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Truth representation</th>
+          <th>검증 방식</th>
+          <th>비교 기준</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A. Snapshot-diff (baseline)</td>
+          <td>등록 시점 tree의 평면 직렬화 배열 <code>[{path, tag, value}, ...]</code></td>
+          <td>현재 tree를 재직렬화하여 path 단위 비교</td>
+          <td>형태(shape) equality</td>
+        </tr>
+        <tr>
+          <td>B. Identity continuity (proposed)</td>
+          <td><code>indexMap</code> + <code>WeakNodeMap</code>, DOM 외부 closure</td>
+          <td>node → WeakNodeMap → entity binding 유지 여부 검사</td>
+          <td>identity continuity</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-7. Case 3 비교 모델 구성</figcaption>
+  </figure>
+
+  <h3 class="subtitle is-5">6.4.2 Scenarios</h3>
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Scenario</th>
+          <th>설명</th>
+          <th>본 케이스의 의도</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>T1</td>
+          <td>Identical-form replacement</td>
+          <td>기존 input node를 완전히 동일한 tag/value의 신규 node로 교체</td>
+          <td>핵심 시나리오 — 형태 비교만으로는 탐지 불가능한 상황</td>
+        </tr>
+        <tr>
+          <td>T2</td>
+          <td>Genuine no-op (control)</td>
+          <td>변경 없음 (대조군)</td>
+          <td>두 모델 모두 valid로 통과해야 함</td>
+        </tr>
+        <tr>
+          <td>T3</td>
+          <td>Value mutation</td>
+          <td><code>input.value</code> 직접 변조</td>
+          <td>두 모델 모두 탐지 가능한 단순 경우</td>
+        </tr>
+        <tr>
+          <td>T4</td>
+          <td>Structural insertion</td>
+          <td>신규 input node 삽입</td>
+          <td>두 모델 모두 탐지 가능한 단순 경우</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-8. Case 3 시나리오</figcaption>
+  </figure>
+
+  <h3 class="subtitle is-5">6.4.3 Detection Result</h3>
+  <figure>
+    <img src="/assets/intro/cover/case3_fig1_detection.svg" alt="Fig.4 Detection matrix snapshot-diff vs identity continuity" />
+    <figcaption>
+      Fig. 4. Detection outcome — Snapshot-diff vs Identity continuity. T1에서 snapshot-diff는 false negative를 발생시키지만 identity continuity는 binding 단절을 탐지한다.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Snapshot-diff (baseline)</th>
+          <th>Identity continuity (proposed)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>T1 Identical-form replacement</td>
+          <td><strong>MISSED (false negative)</strong></td>
+          <td>Detected</td>
+        </tr>
+        <tr>
+          <td>T2 Genuine no-op (control)</td>
+          <td>valid (correctly passed)</td>
+          <td>valid (correctly passed)</td>
+        </tr>
+        <tr>
+          <td>T3 Value mutation</td>
+          <td>Detected</td>
+          <td>Detected</td>
+        </tr>
+        <tr>
+          <td>T4 Structural insertion</td>
+          <td>Detected</td>
+          <td>Detected</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-9. Case 3 시나리오별 탐지 결과</figcaption>
+  </figure>
+
+  <p>
+  T1은 본 케이스의 핵심 시나리오이다. 공격자가 기존 node를 제거하고 완전히 동일한 tag, attribute, value를 가진 신규 node로 교체한 경우,
+  snapshot의 평면 표현은 변경 전후가 동일하므로 diff에서 어떠한 mismatch도 발견되지 않는다.
+  그러나 새로 삽입된 node는 등록 시점의 entity와 binding되어 있지 않으므로
+  WeakNodeMap에서 entity id를 얻을 수 없고, 본 모델은 이를 identity 단절로 판정한다.
+  이는 3.2절에서 정의한 stale subtree 및 unauthorized subtree replacement 상황에 해당한다.
+  </p>
+  <p>
+  T2 대조군에서는 두 모델 모두 valid로 정상 통과하였다. T3과 T4의 단순 mutation 시나리오에서는 두 모델 모두 탐지에 성공하였다.
+  이를 통해 identity continuity 접근이 기존 snapshot-diff가 제공하는 탐지 능력을 유지하면서, snapshot-diff가 놓치는 상황을 추가로 탐지함을 확인할 수 있다.
+  </p>
+
+  <h3 class="subtitle is-5">6.4.4 Performance Comparison</h3>
+  <p>
+  Identity 접근이 추가 탐지 능력을 제공하는 대신 성능 비용이 어떻게 변하는지 보조 측정으로 함께 비교하였다.
+  </p>
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr>
+          <th>Nodes</th>
+          <th>Snapshot validate (ms)</th>
+          <th>Identity validate (ms)</th>
+          <th>Snapshot µs/node</th>
+          <th>Identity µs/node</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10</td><td>0.266</td><td>0.272</td><td>26.62</td><td>27.17</td></tr>
+        <tr><td>50</td><td>0.914</td><td>0.774</td><td>18.28</td><td>15.47</td></tr>
+        <tr><td>100</td><td>1.626</td><td>0.710</td><td>16.27</td><td>7.10</td></tr>
+        <tr><td>500</td><td>11.828</td><td>11.656</td><td>23.66</td><td>23.31</td></tr>
+        <tr><td>1,000</td><td>70.806</td><td>65.237</td><td>70.81</td><td>65.24</td></tr>
+        <tr><td>2,000</td><td>307.74</td><td>304.06</td><td>153.87</td><td>152.03</td></tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-10. 노드 수별 검증 시간 (7회 평균)</figcaption>
+  </figure>
+
+  <p>
+  두 모델은 모든 측정 구간에서 거의 동일한 검증 비용을 보였다 (2000 노드 기준 약 1.01배 차이).
+  Snapshot-diff는 매 검증마다 전체 트리를 재직렬화하고 path 단위 비교를 수행하며,
+  identity 접근은 동일한 깊이의 walk와 노드별 WeakNodeMap lookup을 수행한다. 두 방식 모두 노드 수에 비례한 O(N) walk 비용이 지배적이므로 성능 차이는 미미하다.
+  </p>
+  <p>
+  본 측정의 핵심은 성능 우열의 입증이 아니라, identity continuity 접근이 <em>snapshot-diff 대비 유의미한 성능 손실 없이 추가 탐지 능력을 제공함</em>을 확인하는 데 있다.
+  특히 측정에서 보이는 2000 노드 기준 154 µs/node 수준의 절대 비용은 JSDOM 환경의 walk 비용을 포함한 결과이며, 실제 브라우저 환경에서는 더 낮은 절대 비용이 기대된다.
+  </p>
+
+  <h3 class="subtitle is-5">6.4.5 Discussion</h3>
+  <ul>
+    <li>
+      <strong>Detection capability</strong> : T1 identical-form replacement에서 snapshot-diff는 false negative를 발생시키지만 identity continuity는 탐지한다.
+      이는 본 모델의 핵심 정의(3.2절 stale subtree, 4.1절 identity continuity)가 실제로 식별 가능한 상황을 만들어냄을 보여준다.
+    </li>
+    <li>
+      <strong>Performance parity</strong> : 두 모델은 동일 차수의 walk 비용을 가지며, 측정 범위 내에서 차이는 1% 내외이다. 즉 추가 탐지 능력은 사실상 추가 비용 없이 제공된다.
+    </li>
+    <li>
+      <strong>모델 단순성</strong> : 본 비교에서 식별된 차이는 framework 단의 추가 최적화에 의존하지 않으며, 최소 구조의 closure-scope registry만으로 발생한다.
+    </li>
+  </ul>
+
+  <h3 class="subtitle is-5">6.4.6 Validity and Threats to Validity</h3>
+  <ul>
+    <li>
+      <strong>Snapshot 표현의 단순화</strong>: 본 실험의 snapshot은 tag, value, path만 기록하는 최소 표현을 사용한다.
+      더 정교한 snapshot이 element 식별자나 random nonce를 함께 기록한다면 T1의 false negative는 줄어들 수 있다.
+      그러나 그러한 nonce 자체가 DOM 내부에 위치하는 한 6.2의 Baseline (meta tag) 모델과 동일한 trust boundary 문제를 가지게 된다.
+    </li>
+    <li>
+      <strong>실제 reconcile 알고리즘과의 차이</strong>: 본 실험은 production-grade Virtual DOM의 key-based reconcile를 직접 비교하지 않는다.
+      key-based reconcile은 node 이동을 추적할 수 있으나, 본 케이스의 T1과 같이 동일 key로 교체된 노드에 대해서는 동일하게 false negative가 발생한다.
+    </li>
+    <li>
+      <strong>성능 측정 환경</strong>: Case 1과 동일하게 JSDOM 환경의 측정이며, 절대 수치보다 두 모델의 상대 비교가 의미를 가진다.
+    </li>
+  </ul>
+
+  <h3 class="subtitle is-5">6.4.7 Reproducibility</h3>
+  <figure>
+    <table class="table is-bordered is-fullwidth is-size-7">
+      <thead>
+        <tr><th>파일</th><th>설명</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>case3_experiment.js</code></td><td>T1~T4 detection 실험 코드</td></tr>
+        <tr><td><code>case3_overhead.js</code></td><td>노드 수별 성능 측정 코드</td></tr>
+        <tr><td><code>case3_result.json</code></td><td>detection raw 결과</td></tr>
+        <tr><td><code>case3_overhead.json</code></td><td>성능 측정 raw 결과</td></tr>
+        <tr><td><code>generate_case3_figures.js</code></td><td>Fig.4 SVG 생성 스크립트</td></tr>
+        <tr><td><code>figures/case3_fig1_detection.svg</code></td><td>Fig.4 vector image</td></tr>
+      </tbody>
+    </table>
+    <figcaption>표 6-11. Case 3 재현 자료 목록</figcaption>
+  </figure>
+
+</div>

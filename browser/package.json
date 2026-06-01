@@ -1,0 +1,16 @@
+{
+  "name": "files",
+  "version": "1.0.0",
+  "description": "Confirms that the JSDOM detection outcomes reproduce on real browser engines for the two headline scenarios, using a **minimal reference implementation of the model as described in the paper** (Algorithm 1 + Section 4.1 registry). Detection (boolean) only --- no timing. This turns the demonstration from an *assertion* into *measured evidence* and closes the \"JSDOM external validity\" objection.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}
