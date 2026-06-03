@@ -7,6 +7,11 @@ detects runtime state forgery and stale-subtree replacement that DOM-resident
 baselines miss, and reconstructs components while both preserving runtime state and
 discarding identity that no longer holds.
 
+It also reports the **overhead** of the model as a proposed-to-baseline **ratio**,
+measured on Chromium, Firefox, and JSDOM. Because absolute timings are
+machine-dependent, the ratio and the asymptotic order are the claim — not absolute
+milliseconds.
+
 No personally identifying information is included; all paths are relative.
 
 ## Repository layout
@@ -16,100 +21,119 @@ No personally identifying information is included; all paths are relative.
 ├── README.md
 ├── results_dashboard.html              # results overview (open from the repo root)
 │
-├── browser/                            # live-browser cross-engine confirmation (ES modules)
-│   ├── detection_harness.html          # interactive: S4 / T1 / control, or ?auto=1
+├── browser/                            # reference implementation + measurement (ES modules)
 │   ├── model-core.mjs                  # minimal reference implementation (no dependencies)
 │   ├── scenarios.mjs                   # S4 / T1 / control scenario definitions
-│   ├── run_browser_detection.mjs # Playwright runner (Chromium + Firefox)
+│   │
+│   ├── detection_harness.html          # harness loaded by the Playwright detection runner
+│   ├── run_browser_detection.mjs       # Playwright detection runner (Chromium + Firefox)
+│   │
+│   ├── bench-stats.mjs                 # paired-ratio measurement + median/IQR aggregation
+│   ├── bench-core-paired.mjs           # unified paired core for Case 1 / 3 / 4 (+ payload)
+│   ├── benchmark-paired.mjs            # browser wrapper (window.__runPaired)
+│   ├── benchmark_paired_harness.html
+│   ├── run_paired.mjs                  # ⭐ overhead runner: JSDOM + Chromium + Firefox, all cases
+│   ├── bench-node-paired.mjs           # JSDOM-only paired runner (quick local check)
+│   │
 │   ├── package.json
-│   └── results/                        # captured measurements
-│       ├── browser_detection_chromium.json
-│       └── browser_detection_firefox.json
+│   └── results/                        # captured measurements (committed JSON)
+│       ├── browser_detection_chromium.json / browser_detection_firefox.json
+│       └── paired_case{1,3,4}_{chromium,firefox,jsdom}.json
 │
-└── jsdom/                              # primary JSDOM experiments (CommonJS)
-    ├── case_1/                         # Case 1 — Runtime State Forgery Detection
-    │   ├── case1_experiment.js         # S1–S4 detection
-    │   ├── case1_overhead_v2.js        # validation time + payload
-    │   ├── generate_figures_svg.js     # figures from the JSON results
-    │   ├── case1_result.json / case1_overhead.json
-    │   └── case1_fig1_detection.svg / case1_fig2_validation_time.svg / case1_fig3_payload_size.svg
-    ├── case_3/                         # Case 3 — Snapshot Diff vs. Identity Continuity
-    │   ├── case3_experiment.js / case3_overhead.js
-    │   ├── generate_case3_figures.js
-    │   ├── case3_result.json / case3_overhead.json
-    │   └── case3_fig1_detection.svg
-    └── case_4/                         # Case 4 — Component Reconstruction Consistency
-        ├── case4_experiment.js / case4_overhead.js
-        ├── generate_case4_figures.js
-        ├── case4_result.json / case4_overhead.json
-        └── case4_fig1_detection.svg / case4_fig2_reconstruction_time.svg / case4_fig3_payload_size.svg
+├── jsdom/                              # per-case detection experiments + detection figures (CommonJS)
+│   ├── case_1/  case1_experiment.js, case1_result.json, case1_fig1_detection.svg, ...
+│   ├── case_3/  case3_experiment.js, case3_result.json, case3_fig1_detection.svg, ...
+│   └── case_4/  case4_experiment.js, case4_result.json, case4_fig1_detection.svg, ...
+│
+│   (plus)
+└── form-node/                              # interactive browser demo (login form)
+    ├── demo.html                           # ⭐ the interactive demo entry point
+    ├── model-form.mjs                      # demo registry (createRegistry)
+    └── canonical.json                      # authority-issued entity tree (static stand-in)
 ```
+
+> **Overhead source of truth.** All timing/payload numbers in the paper and in
+> `results_dashboard.html` come from the **paired runner** (`run_paired.mjs`,
+> `results/paired_*.json`). The `jsdom/` case folders provide the **detection**
+> experiments and detection figures; any earlier single-run timing scripts there are
+> superseded by the paired protocol and retained only for provenance.
 
 ## Results at a glance
 
-Open `results_dashboard.html` **from the repository root** (so the relative figure
-paths resolve). It collects the detection tables for Case 1 / 3 / 4, the cross-engine
-confirmation, and the overhead figures.
+Open `results_dashboard.html` **from the repository root** (so relative paths
+resolve). It collects the detection tables for Case 1 / 3 / 4, the cross-engine
+confirmation, and the overhead **ratio** tables (median with IQR).
 
 Headline outcomes:
 
 - **Case 1 (S4 evasion):** when the attacker forges both the property *and* the in-DOM
   `<meta>` the baseline relies on, the baseline is **bypassed**; the registry model
-  (truth outside the DOM) still **detects** it.
+  (truth outside the DOM) still **detects** it. Validation time: proposed runs at about
+  0.70× (Chromium) / 0.47× (Firefox) of the baseline at 2,000 nodes, same O(N) order.
 - **Case 3 (T1 stale-subtree):** an identical-form replacement is **missed** by
-  snapshot-diff but **detected** by identity continuity (broken node→entity binding).
+  snapshot-diff but **detected** by identity continuity. Validation cost stays within
+  about 11% of the baseline on both production engines.
 - **Case 4 (R1/R2):** only identity reconciliation both **preserves** runtime state (R1)
-  and **discards** stale state under a new authority-issued identity (R2).
+  and **discards** stale state under a new authority-issued identity (R2). Reconstruction
+  cost stays within about 12% of keyed reconcile; payloads differ by under 1%.
 - **Cross-engine:** S4 and T1 reproduce identically on Chromium 148 and Firefox 150.
 
 ## Reproduce
 
 ### A. Interactive demo (live browser)
 
-The harness uses ES modules, so it must be served over HTTP (opening the file
-directly with `file://` is blocked by the browser's module CORS policy).
+The interactive demo is **`form-node/demo.html`**: a login form whose canonical
+entity tree is fetched from `canonical.json` and registered *outside* the DOM on
+load. It uses ES modules and `fetch`, so it must be served over HTTP (`file://` is
+blocked by the browser's module/fetch policy).
 
 ```bash
-# from the repo root, serve the browser/ folder with any static server, e.g.
-npx serve browser
-# then open the printed URL and load detection_harness.html
+# from the repo root, serve the form-node/ folder with any static server, e.g.
+npx serve form-node
+# then open the printed URL and load demo.html
 ```
 
-Use the **S4 / T1 / control** buttons to trigger each case and read the verdict
-(`Detected` / `not detected`) with its reason. Append `?auto=1` to the URL to run all
-three on load.
+Tamper with the form from the console (change a `value` without `commit`, or move/
+replace a node), then click **Validate** to read the verdict and its reason. This is
+the hands-on counterpart to the automated detection run in step B.
 
-### B. Cross-engine confirmation (automated)
+### B. Cross-engine detection (automated)
 
 ```bash
 cd browser
 npm install
-npx playwright install        # downloads Chromium and Firefox
-node run_browser_detection.mjs
+npx playwright install            # downloads Chromium and Firefox
+node run_browser_detection.mjs    # -> results/browser_detection_<engine>.json
 ```
 
-This serves the harness, runs the scenarios on both engines, and writes
-`results/browser_detection_<engine>.json` (engine versions are captured at run time).
+### C. Overhead — paired ratio across three environments
 
-### C. JSDOM case experiments
+```bash
+cd browser
+npm install                       # jsdom + playwright
+npx playwright install chromium firefox
+npm run paired                    # -> results/paired_<case>_<engine>.json (JSDOM + Chromium + Firefox)
+npm run paired:jsdom              # JSDOM-only quick check (no browsers)
+```
 
-Each case folder is self-contained. Install `jsdom` once, then run the scripts:
+The paired runner times the proposed and baseline operations in **adjacent windows**
+and forms the ratio in place, so common-mode clock variation cancels. It reports the
+median with IQR over independent runs (30×10 for Case 1/3, 15×5 for Case 4). Budgets
+are set per case in `run_paired.mjs` (`BUDGET`).
+
+### D. JSDOM detection experiments + figures
 
 ```bash
 cd jsdom/case_1
 npm install jsdom
-node case1_experiment.js        # -> case1_result.json   (detection)
-node case1_overhead_v2.js       # -> case1_overhead.json  (timing + payload)
-node generate_figures_svg.js    # -> the case1_*.svg figures
+node case1_experiment.js          # -> case1_result.json (detection)
+node generate_figures_svg.js      # -> detection SVG figure(s)
 ```
-
-Case 3 and Case 4 follow the same pattern with their respective
-`*_experiment.js`, `*_overhead.js`, and `generate_*figures.js` scripts.
+Case 3 and Case 4 follow the same pattern.
 
 ## Paper ↔ code mapping
 
-The minimal reference implementation lives in `browser/model-core.mjs`. The mapping
-below ties the model in the paper to the symbols you can read there.
+The minimal reference implementation lives in `browser/model-core.mjs`.
 
 | Concept in the paper | Symbol in `model-core.mjs` |
 |---|---|
@@ -121,24 +145,58 @@ below ties the model in the paper to the symbols you can read there.
 | Runtime state validation | `validateRuntimeState()` |
 | Interaction propagation channel | `commit()` |
 
-The JSDOM case experiments use the same structure inline (`createRegistry`,
-`indexMap`, `weakNodeMap`) so each case is runnable on its own.
+Overhead measurement per case (in `bench-core-paired.mjs`): Case 1 = closure registry
+vs optimized in-DOM metadata index; Case 3 = registry walk vs snapshot re-serialize+diff;
+Case 4 = identity-issued reconcile vs keyed reconcile (+ deterministic payload).
+
+| Paper | Detection | Overhead |
+|---|---|---|
+| §6 Case 1 | `jsdom/case_1/`, `scenarios.mjs` | `results/paired_case1_*.json` |
+| §6 Case 3 | `jsdom/case_3/` | `results/paired_case3_*.json` |
+| §6 Case 4 | `jsdom/case_4/` | `results/paired_case4_*.json` |
+| cross-engine | `run_browser_detection.mjs` | — |
+
+## Measurement environment
+
+The committed `results/paired_*.json` were produced on:
+
+| | |
+|---|---|
+| CPU | Intel Core i7-8565U (4 cores / 8 threads, base 1.80 GHz) |
+| RAM | 15.8 GB |
+| OS | Windows 11 (64-bit) |
+| Power plan | Balanced |
+| Node.js | v22.14.0 |
+| Engines | Chromium 148.0.7778.96, Firefox 150.0.2 |
+
+This is a mobile-class CPU on a balanced power plan, so the absolute clock varies
+during a run. The paired protocol is designed for this: baseline and proposed are
+timed in adjacent windows and the ratio is formed in place, so the momentary clock
+cancels. Reported ratios are therefore robust to clock variation; re-running on other
+hardware is expected to change absolute times but not the ratios or the order.
 
 ## Notes on scope
 
-- The browser runs report **detection only**. Absolute timing is environment-dependent
-  and is **not** claimed across engines; the overhead figures are from JSDOM.
+- **Overhead claim.** The claim is the **ratio** and the **asymptotic order**, both
+  hardware-independent. Absolute milliseconds appear only inside the JSON and are
+  specific to the machine above; do not compare them across environments.
+- **Detection vs timing.** Detection is a boolean and reproduces identically across
+  engines and engine versions; timing ratios may shift slightly with version but the
+  order is stable.
 - The control scenario is included so that an implementation that always reports a
   deviation would visibly fail it.
-- The `form-demo` registers a canonical entity tree loaded from `canonical.json`. This file is a 
-  **static stand-in for an authority-issued entity-id lineage** — in a deployment the lineage originates
-  from an external Reconstruction Authority, which this demo does not implement.
-- `entity.id` is an **authority-issued id** carried in `canonical.json`, *not* the DOM `id` attribute.
+- The interactive demo (`form-node/demo.html`) registers a canonical entity tree
+  loaded from `canonical.json`, a
+  **static stand-in for an authority-issued entity-id lineage** — in a deployment the
+  lineage originates from an external Reconstruction Authority, which this demo does
+  not implement.
+- `entity.id` is an **authority-issued id** carried in `canonical.json`, *not* the DOM
+  `id` attribute.
 - Validation trusts the **node ↔ canonical-entity binding**, not the node's tag/shape.
-- **What the demo shows:** detection *after the registry is established* — structural deviation
-  (type / parent / order / child-count) and runtime-state forgery (a `value` change that did not pass
-  `commit`), performed from the console **after load**.
-- **What the demo does not show (out of scope, by the paper's trust model):** that the authority is
-  external, or that its issuance/delivery is tamper-proof. The authority is a **trust assumption /
-  precondition**, not a protected target. Load-time tampering (for example, intercepting the canonical
-  fetch) is out of scope.
+- **What the demo shows:** detection *after the registry is established* — structural
+  deviation (type / parent / order / child-count) and runtime-state forgery (a `value`
+  change that did not pass `commit`), performed from the console **after load**.
+- **What the demo does not show (out of scope, by the paper's trust model):** that the
+  authority is external, or that its issuance/delivery is tamper-proof. The authority is
+  a **trust assumption / precondition**, not a protected target. Load-time tampering
+  (e.g. intercepting the canonical fetch) is out of scope.

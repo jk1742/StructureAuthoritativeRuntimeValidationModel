@@ -1,0 +1,93 @@
+{
+  "engine": "firefox",
+  "engineVersion": "150.0.2",
+  "case": "case1",
+  "paired": "proposed/baseline",
+  "rows": [
+    {
+      "nodes": 10,
+      "ratio_median": 0.75,
+      "ratio_iqr": [
+        0.7143,
+        0.75
+      ],
+      "baseline_ms_median": 0.0026,
+      "proposed_ms_median": 0.002
+    },
+    {
+      "nodes": 50,
+      "ratio_median": 0.75,
+      "ratio_iqr": [
+        0.75,
+        0.75
+      ],
+      "baseline_ms_median": 0.0117,
+      "proposed_ms_median": 0.0091
+    },
+    {
+      "nodes": 100,
+      "ratio_median": 0.7708,
+      "ratio_iqr": [
+        0.75,
+        0.7778
+      ],
+      "baseline_ms_median": 0.0234,
+      "proposed_ms_median": 0.0182
+    },
+    {
+      "nodes": 200,
+      "ratio_median": 0.7778,
+      "ratio_iqr": [
+        0.7778,
+        0.7778
+      ],
+      "baseline_ms_median": 0.0469,
+      "proposed_ms_median": 0.0365
+    },
+    {
+      "nodes": 500,
+      "ratio_median": 0.75,
+      "ratio_iqr": [
+        0.75,
+        0.75
+      ],
+      "baseline_ms_median": 0.125,
+      "proposed_ms_median": 0.0938
+    },
+    {
+      "nodes": 1000,
+      "ratio_median": 0.75,
+      "ratio_iqr": [
+        0.75,
+        0.75
+      ],
+      "baseline_ms_median": 0.25,
+      "proposed_ms_median": 0.1875
+    },
+    {
+      "nodes": 2000,
+      "ratio_median": 0.469,
+      "ratio_iqr": [
+        0.4667,
+        0.472
+      ],
+      "baseline_ms_median": 0.8333,
+      "proposed_ms_median": 0.4375
+    }
+  ],
+  "config": {
+    "nodeCounts": [
+      10,
+      50,
+      100,
+      200,
+      500,
+      1000,
+      2000
+    ],
+    "repeat": 30,
+    "warmup": 3,
+    "runs": 10,
+    "targetMs": 5
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "engine": "jsdom",
+  "engineVersion": "v22.14.0",
+  "case": "case4",
+  "paired": "proposed/baseline",
+  "rows": [
+    {
+      "nodes": 10,
+      "ratio_median": 0.9714,
+      "ratio_iqr": [
+        0.9713,
+        1.0024
+      ],
+      "baseline_ms_median": 0.2603,
+      "proposed_ms_median": 0.2402
+    },
+    {
+      "nodes": 50,
+      "ratio_median": 0.9484,
+      "ratio_iqr": [
+        0.9054,
+        0.9896
+      ],
+      "baseline_ms_median": 1.4317,
+      "proposed_ms_median": 1.4584
+    },
+    {
+      "nodes": 100,
+      "ratio_median": 0.9299,
+      "ratio_iqr": [
+        0.9186,
+        0.9587
+      ],
+      "baseline_ms_median": 4.6411,
+      "proposed_ms_median": 3.8246
+    },
+    {
+      "nodes": 500,
+      "ratio_median": 1.0259,
+      "ratio_iqr": [
+        1.0251,
+        1.0496
+      ],
+      "baseline_ms_median": 61.1025,
+      "proposed_ms_median": 60.916
+    },
+    {
+      "nodes": 1000,
+      "ratio_median": 1.0408,
+      "ratio_iqr": [
+        1.0359,
+        1.0783
+      ],
+      "baseline_ms_median": 197.9091,
+      "proposed_ms_median": 208.8094
+    },
+    {
+      "nodes": 2000,
+      "ratio_median": 1.0302,
+      "ratio_iqr": [
+        0.9967,
+        1.0465
+      ],
+      "baseline_ms_median": 838.4308,
+      "proposed_ms_median": 856.0492
+    }
+  ],
+  "config": {
+    "nodeCounts": [
+      10,
+      50,
+      100,
+      500,
+      1000,
+      2000
+    ],
+    "repeat": 15,
+    "warmup": 3,
+    "runs": 5,
+    "targetMs": 5
+  },
+  "payload": [
+    {
+      "nodes": 10,
+      "innerHTML_bytes": 570,
+      "keyed_bytes": 1114,
+      "identity_bytes": 1104,
+      "identity_vs_keyed_pct": -0.9
+    },
+    {
+      "nodes": 50,
+      "innerHTML_bytes": 2930,
+      "keyed_bytes": 5634,
+      "identity_bytes": 5584,
+      "identity_vs_keyed_pct": -0.89
+    },
+    {
+      "nodes": 100,
+      "innerHTML_bytes": 5880,
+      "keyed_bytes": 11284,
+      "identity_bytes": 11184,
+      "identity_vs_keyed_pct": -0.89
+    },
+    {
+      "nodes": 500,
+      "innerHTML_bytes": 30280,
+      "keyed_bytes": 57684,
+      "identity_bytes": 57184,
+      "identity_vs_keyed_pct": -0.87
+    },
+    {
+      "nodes": 1000,
+      "innerHTML_bytes": 60780,
+      "keyed_bytes": 115684,
+      "identity_bytes": 114684,
+      "identity_vs_keyed_pct": -0.86
+    },
+    {
+      "nodes": 2000,
+      "innerHTML_bytes": 123780,
+      "keyed_bytes": 234684,
+      "identity_bytes": 232684,
+      "identity_vs_keyed_pct": -0.85
+    }
+  ]
+}
