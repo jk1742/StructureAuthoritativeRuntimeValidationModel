@@ -130,3 +130,15 @@ The JSDOM case experiments use the same structure inline (`createRegistry`,
   and is **not** claimed across engines; the overhead figures are from JSDOM.
 - The control scenario is included so that an implementation that always reports a
   deviation would visibly fail it.
+- The `form-demo` registers a canonical entity tree loaded from `canonical.json`. This file is a 
+  **static stand-in for an authority-issued entity-id lineage** — in a deployment the lineage originates
+  from an external Reconstruction Authority, which this demo does not implement.
+- `entity.id` is an **authority-issued id** carried in `canonical.json`, *not* the DOM `id` attribute.
+- Validation trusts the **node ↔ canonical-entity binding**, not the node's tag/shape.
+- **What the demo shows:** detection *after the registry is established* — structural deviation
+  (type / parent / order / child-count) and runtime-state forgery (a `value` change that did not pass
+  `commit`), performed from the console **after load**.
+- **What the demo does not show (out of scope, by the paper's trust model):** that the authority is
+  external, or that its issuance/delivery is tamper-proof. The authority is a **trust assumption /
+  precondition**, not a protected target. Load-time tampering (for example, intercepting the canonical
+  fetch) is out of scope.
