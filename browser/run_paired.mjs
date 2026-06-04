@@ -17,8 +17,9 @@ import { runPaired } from "./bench-core-paired.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(__dirname, "results");
 const CASES = ["case1", "case3", "case4"];
-const BUDGET = { case1: { repeat: 30, runs: 10 }, case3: { repeat: 30, runs: 10 }, case4: { repeat: 15, runs: 5 } };
-
+// const CASES = ["case4"];
+//  const BUDGET = { case1: { repeat: 30, runs: 10 }, case3: { repeat: 30, runs: 10 }, case4: { repeat: 30, runs: 10 } };
+const BUDGET = { case1: { repeat: 30, runs: 10 }, case3: { repeat: 30, runs: 10 }, case4: { repeat: 30, runs: 10, warmup: 10 } };
 function startServer(root) {
   const types = { ".html": "text/html", ".mjs": "text/javascript", ".json": "application/json" };
   const s = http.createServer(async (req, res) => {

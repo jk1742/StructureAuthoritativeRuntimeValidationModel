@@ -6,63 +6,73 @@
   "rows": [
     {
       "nodes": 10,
-      "ratio_median": 0.8889,
+      "ratio_median": 0.8623,
       "ratio_iqr": [
-        0.8438,
-        0.9643
+        0.8465,
+        0.8745
       ],
-      "baseline_ms_median": 0.0547,
-      "proposed_ms_median": 0.0469
+      "baseline_ms_median": 0.0729,
+      "proposed_ms_median": 0.0625
     },
     {
       "nodes": 50,
-      "ratio_median": 0.8333,
+      "ratio_median": 0.9321,
       "ratio_iqr": [
-        0.8205,
-        0.8333
+        0.8991,
+        0.9423
       ],
-      "baseline_ms_median": 0.25,
-      "proposed_ms_median": 0.2083
+      "baseline_ms_median": 0.3125,
+      "proposed_ms_median": 0.2917
     },
     {
       "nodes": 100,
-      "ratio_median": 0.8571,
+      "ratio_median": 0.9149,
       "ratio_iqr": [
-        0.8571,
+        0.8794,
+        0.975
+      ],
+      "baseline_ms_median": 0.625,
+      "proposed_ms_median": 0.5833
+    },
+    {
+      "nodes": 200,
+      "ratio_median": 0.875,
+      "ratio_iqr": [
+        0.8683,
         0.875
       ],
-      "baseline_ms_median": 0.4375,
-      "proposed_ms_median": 0.375
+      "baseline_ms_median": 1.1667,
+      "proposed_ms_median": 1.1667
     },
     {
       "nodes": 500,
-      "ratio_median": 0.8889,
+      "ratio_median": 0.8882,
       "ratio_iqr": [
         0.8571,
-        0.8889
+        0.9504
       ],
-      "baseline_ms_median": 2.3333,
-      "proposed_ms_median": 2
+      "baseline_ms_median": 3,
+      "proposed_ms_median": 3
     },
     {
       "nodes": 1000,
-      "ratio_median": 0.8889,
+      "ratio_median": 0.9792,
       "ratio_iqr": [
-        0.8889,
-        0.9
+        0.9315,
+        1
       ],
-      "baseline_ms_median": 4.5,
-      "proposed_ms_median": 4
+      "baseline_ms_median": 6,
+      "proposed_ms_median": 5.5
     },
     {
       "nodes": 2000,
-      "ratio_median": 0.875,
+      "ratio_median": 0.9167,
       "ratio_iqr": [
-        0.875,
-        0.8889
+        0.9167,
+        0.9167
       ],
-      "baseline_ms_median": 8,
-      "proposed_ms_median": 7
+      "baseline_ms_median": 12,
+      "proposed_ms_median": 11
     }
   ],
   "config": {
@@ -70,13 +80,14 @@
       10,
       50,
       100,
+      200,
       500,
       1000,
       2000
     ],
-    "repeat": 15,
-    "warmup": 3,
-    "runs": 5,
+    "repeat": 30,
+    "warmup": 10,
+    "runs": 10,
     "targetMs": 5
   },
   "payload": [
@@ -100,6 +111,13 @@
       "keyed_bytes": 11284,
       "identity_bytes": 11184,
       "identity_vs_keyed_pct": -0.89
+    },
+    {
+      "nodes": 200,
+      "innerHTML_bytes": 11980,
+      "keyed_bytes": 22884,
+      "identity_bytes": 22684,
+      "identity_vs_keyed_pct": -0.87
     },
     {
       "nodes": 500,

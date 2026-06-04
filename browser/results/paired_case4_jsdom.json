@@ -6,63 +6,73 @@
   "rows": [
     {
       "nodes": 10,
-      "ratio_median": 0.9714,
+      "ratio_median": 0.9562,
       "ratio_iqr": [
-        0.9713,
-        1.0024
+        0.9533,
+        0.9595
       ],
-      "baseline_ms_median": 0.2603,
-      "proposed_ms_median": 0.2402
+      "baseline_ms_median": 0.3887,
+      "proposed_ms_median": 0.37
     },
     {
       "nodes": 50,
-      "ratio_median": 0.9484,
+      "ratio_median": 0.9643,
       "ratio_iqr": [
-        0.9054,
-        0.9896
+        0.9569,
+        0.9748
       ],
-      "baseline_ms_median": 1.4317,
-      "proposed_ms_median": 1.4584
+      "baseline_ms_median": 2.4487,
+      "proposed_ms_median": 2.3589
     },
     {
       "nodes": 100,
-      "ratio_median": 0.9299,
+      "ratio_median": 0.9534,
       "ratio_iqr": [
-        0.9186,
-        0.9587
+        0.9512,
+        0.9557
       ],
-      "baseline_ms_median": 4.6411,
-      "proposed_ms_median": 3.8246
+      "baseline_ms_median": 6.5392,
+      "proposed_ms_median": 6.2117
+    },
+    {
+      "nodes": 200,
+      "ratio_median": 0.9998,
+      "ratio_iqr": [
+        0.9918,
+        1.0065
+      ],
+      "baseline_ms_median": 20.4216,
+      "proposed_ms_median": 20.2631
     },
     {
       "nodes": 500,
-      "ratio_median": 1.0259,
+      "ratio_median": 1.0464,
       "ratio_iqr": [
-        1.0251,
-        1.0496
+        1.0388,
+        1.0704
       ],
-      "baseline_ms_median": 61.1025,
-      "proposed_ms_median": 60.916
+      "baseline_ms_median": 105.4082,
+      "proposed_ms_median": 113.6934
     },
     {
       "nodes": 1000,
-      "ratio_median": 1.0408,
+      "ratio_median": 1.0967,
       "ratio_iqr": [
-        1.0359,
-        1.0783
+        1.0883,
+        1.1074
       ],
-      "baseline_ms_median": 197.9091,
-      "proposed_ms_median": 208.8094
+      "baseline_ms_median": 343.5478,
+      "proposed_ms_median": 377.6999
     },
     {
       "nodes": 2000,
-      "ratio_median": 1.0302,
+      "ratio_median": 1.0213,
       "ratio_iqr": [
-        0.9967,
-        1.0465
+        1.0199,
+        1.0342
       ],
-      "baseline_ms_median": 838.4308,
-      "proposed_ms_median": 856.0492
+      "baseline_ms_median": 1495.8428,
+      "proposed_ms_median": 1532.7509
     }
   ],
   "config": {
@@ -70,13 +80,14 @@
       10,
       50,
       100,
+      200,
       500,
       1000,
       2000
     ],
-    "repeat": 15,
-    "warmup": 3,
-    "runs": 5,
+    "repeat": 30,
+    "warmup": 10,
+    "runs": 10,
     "targetMs": 5
   },
   "payload": [
@@ -100,6 +111,13 @@
       "keyed_bytes": 11284,
       "identity_bytes": 11184,
       "identity_vs_keyed_pct": -0.89
+    },
+    {
+      "nodes": 200,
+      "innerHTML_bytes": 11980,
+      "keyed_bytes": 22884,
+      "identity_bytes": 22684,
+      "identity_vs_keyed_pct": -0.87
     },
     {
       "nodes": 500,

@@ -19,7 +19,7 @@ No personally identifying information is included; all paths are relative.
 ```
 .
 ├── README.md
-├── results_dashboard.html              # results overview (open from the repo root)
+├── results_dashboard.html              # results overview (self-contained; loads Chart.js from a CDN)
 │
 ├── browser/                            # reference implementation + measurement (ES modules)
 │   ├── model-core.mjs                  # minimal reference implementation (no dependencies)
@@ -60,22 +60,29 @@ No personally identifying information is included; all paths are relative.
 
 ## Results at a glance
 
-Open `results_dashboard.html` **from the repository root** (so relative paths
-resolve). It collects the detection tables for Case 1 / 3 / 4, the cross-engine
-confirmation, and the overhead **ratio** tables (median with IQR).
+Open `results_dashboard.html` in any browser. It is self-contained (the result
+numbers are embedded inline); the only external dependency is the Chart.js CDN, so an
+internet connection is needed to render the charts. It collects the detection tables
+for Case 1 / 3 / 4, the cross-engine confirmation, and the overhead **ratio** tables
+(median; the IQR for each point is in the committed JSON).
 
 Headline outcomes:
 
 - **Case 1 (S4 evasion):** when the attacker forges both the property *and* the in-DOM
   `<meta>` the baseline relies on, the baseline is **bypassed**; the registry model
   (truth outside the DOM) still **detects** it. Validation time: proposed runs at about
-  0.70× (Chromium) / 0.47× (Firefox) of the baseline at 2,000 nodes, same O(N) order.
+  0.69× (Chromium) / 0.50× (Firefox) of the baseline at 2,000 nodes, same O(N) order
+  (proposed is faster because it avoids a per-field DOM read).
 - **Case 3 (T1 stale-subtree):** an identical-form replacement is **missed** by
-  snapshot-diff but **detected** by identity continuity. Validation cost stays within
-  about 11% of the baseline on both production engines.
+  snapshot-diff but **detected** by identity continuity. Validation is the same O(N)
+  order, but the ratio is **engine-dependent** (about 0.74–1.17 across engines: near
+  parity on Chromium, slightly higher on Firefox, and lower under JSDOM at large N,
+  where the snapshot baseline's per-validation array allocation degrades faster). The
+  **detection result — not a single overhead figure — is the claim for this case.**
 - **Case 4 (R1/R2):** only identity reconciliation both **preserves** runtime state (R1)
   and **discards** stale state under a new authority-issued identity (R2). Reconstruction
-  cost stays within about 12% of keyed reconcile; payloads differ by under 1%.
+  cost stays within about 14% of keyed reconcile (median 0.86–1.10 across engines);
+  payloads differ by under 1%.
 - **Cross-engine:** S4 and T1 reproduce identically on Chromium 148 and Firefox 150.
 
 ## Reproduce
@@ -118,16 +125,16 @@ npm run paired:jsdom              # JSDOM-only quick check (no browsers)
 
 The paired runner times the proposed and baseline operations in **adjacent windows**
 and forms the ratio in place, so common-mode clock variation cancels. It reports the
-median with IQR over independent runs (30×10 for Case 1/3, 15×5 for Case 4). Budgets
-are set per case in `run_paired.mjs` (`BUDGET`).
+median with IQR over independent runs (30 paired windows × 10 runs for all three
+cases; Case 4 additionally uses 10 warmup windows). Budgets are set per case in
+`run_paired.mjs` (`BUDGET`).
 
 ### D. JSDOM detection experiments + figures
 
 ```bash
 cd jsdom/case_1
-npm install jsdom
-node case1_experiment.js          # -> case1_result.json (detection)
-node generate_figures_svg.js      # -> detection SVG figure(s)
+npm install                 # installs jsdom (required; skipping it gives "Cannot find module 'jsdom'")
+npm run experiment          # prints the detection table and rewrites case1_result.json
 ```
 Case 3 and Case 4 follow the same pattern.
 
@@ -165,15 +172,22 @@ The committed `results/paired_*.json` were produced on:
 | CPU | Intel Core i7-8565U (4 cores / 8 threads, base 1.80 GHz) |
 | RAM | 15.8 GB |
 | OS | Windows 11 (64-bit) |
-| Power plan | Balanced |
+| Power plan | High performance, CPU turbo disabled (clock held near base) |
 | Node.js | v22.14.0 |
 | Engines | Chromium 148.0.7778.96, Firefox 150.0.2 |
 
-This is a mobile-class CPU on a balanced power plan, so the absolute clock varies
-during a run. The paired protocol is designed for this: baseline and proposed are
-timed in adjacent windows and the ratio is formed in place, so the momentary clock
-cancels. Reported ratios are therefore robust to clock variation; re-running on other
-hardware is expected to change absolute times but not the ratios or the order.
+This is a mobile-class CPU. For the committed runs, CPU turbo was disabled so the
+clock stays near its base frequency, which reduces run-to-run drift in the median. The
+paired protocol additionally times baseline and proposed in **adjacent windows** and
+forms the ratio in place, so any residual momentary clock variation cancels. Reported
+ratios are therefore robust to clock variation; re-running on other hardware is
+expected to change absolute times but not the ratios or the order.
+
+JSDOM is a JavaScript reimplementation of the DOM and is **not** performance-
+representative: some of its DOM operations scale super-linearly where the production
+engines stay linear, so JSDOM is reported as a cross-check on direction and order, not
+as a representative timing curve. The two production engines (Chromium, Firefox) are
+the headline.
 
 ## Notes on scope
 
@@ -181,8 +195,8 @@ hardware is expected to change absolute times but not the ratios or the order.
   hardware-independent. Absolute milliseconds appear only inside the JSON and are
   specific to the machine above; do not compare them across environments.
 - **Detection vs timing.** Detection is a boolean and reproduces identically across
-  engines and engine versions; timing ratios may shift slightly with version but the
-  order is stable.
+  engines and engine versions; timing ratios may shift with version, engine, and (for
+  Case 3) node count, but the order is stable.
 - The control scenario is included so that an implementation that always reports a
   deviation would visibly fail it.
 - The interactive demo (`form-node/demo.html`) registers a canonical entity tree

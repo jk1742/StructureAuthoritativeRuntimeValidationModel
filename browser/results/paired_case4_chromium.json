@@ -6,63 +6,73 @@
   "rows": [
     {
       "nodes": 10,
-      "ratio_median": 0.9906,
+      "ratio_median": 0.9887,
       "ratio_iqr": [
-        0.9852,
-        1
+        0.9645,
+        1.0052
       ],
-      "baseline_ms_median": 0.4867,
-      "proposed_ms_median": 0.3312
+      "baseline_ms_median": 0.5509,
+      "proposed_ms_median": 0.5583
     },
     {
       "nodes": 50,
-      "ratio_median": 1.0294,
+      "ratio_median": 1.0104,
       "ratio_iqr": [
-        1.0159,
-        1.0313
+        0.9712,
+        1.0247
       ],
-      "baseline_ms_median": 0.7556,
-      "proposed_ms_median": 0.775
+      "baseline_ms_median": 1.0392,
+      "proposed_ms_median": 1.025
     },
     {
       "nodes": 100,
-      "ratio_median": 1.0149,
+      "ratio_median": 0.9986,
       "ratio_iqr": [
-        0.9851,
-        1.0152
+        0.9902,
+        1.0172
       ],
-      "baseline_ms_median": 1.7333,
-      "proposed_ms_median": 1.9
+      "baseline_ms_median": 2.9083,
+      "proposed_ms_median": 2.8708
+    },
+    {
+      "nodes": 200,
+      "ratio_median": 0.9799,
+      "ratio_iqr": [
+        0.9731,
+        0.9877
+      ],
+      "baseline_ms_median": 10.075,
+      "proposed_ms_median": 9.825
     },
     {
       "nodes": 500,
-      "ratio_median": 0.9803,
+      "ratio_median": 0.9654,
       "ratio_iqr": [
-        0.9636,
-        0.9821
+        0.9578,
+        0.9829
       ],
-      "baseline_ms_median": 44.6,
-      "proposed_ms_median": 43.5
+      "baseline_ms_median": 59.225,
+      "proposed_ms_median": 57.55
     },
     {
       "nodes": 1000,
-      "ratio_median": 0.9723,
+      "ratio_median": 0.955,
       "ratio_iqr": [
-        0.9399,
-        0.9799
+        0.9535,
+        0.9647
       ],
-      "baseline_ms_median": 162.8,
-      "proposed_ms_median": 160.9
+      "baseline_ms_median": 241.075,
+      "proposed_ms_median": 231.95
     },
     {
       "nodes": 2000,
-      "ratio_median": 0.9805,
+      "ratio_median": 0.9682,
       "ratio_iqr": [
-        0.98,
-        1.0008
+        0.9618,
+        0.9723
       ],
-      "baseline_ms_median": 700.2,
-      "proposed_ms_median": 689.1
+      "baseline_ms_median": 1065.5,
+      "proposed_ms_median": 1025.25
     }
   ],
   "config": {
@@ -70,13 +80,14 @@
       10,
       50,
       100,
+      200,
       500,
       1000,
       2000
     ],
-    "repeat": 15,
-    "warmup": 3,
-    "runs": 5,
+    "repeat": 30,
+    "warmup": 10,
+    "runs": 10,
     "targetMs": 5
   },
   "payload": [
@@ -100,6 +111,13 @@
       "keyed_bytes": 11284,
       "identity_bytes": 11184,
       "identity_vs_keyed_pct": -0.89
+    },
+    {
+      "nodes": 200,
+      "innerHTML_bytes": 11980,
+      "keyed_bytes": 22884,
+      "identity_bytes": 22684,
+      "identity_vs_keyed_pct": -0.87
     },
     {
       "nodes": 500,

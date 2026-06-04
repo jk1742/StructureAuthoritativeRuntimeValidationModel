@@ -1,0 +1,14 @@
+{
+  "name": "case1-detection",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Case 1 - Runtime State Forgery Detection. Reproduces Table 2 (baseline in-DOM meta vs proposed registry). The proposed model is imported from model-form.mjs (the Section 5 model used by the demo), not reimplemented.",
+  "scripts": {
+    "experiment": "node case1_experiment.mjs",
+    "case1": "node case1_experiment.mjs"
+  },
+  "dependencies": {
+    "jsdom": "^24.1.3"
+  }
+}

@@ -30,9 +30,9 @@
     }
   },
   {
-    "scenario": "S3: textarea.value direct forgery",
+    "scenario": "S3: value direct forgery",
     "target": "memo",
-    "attack": "textarea.value='INJECTED'",
+    "attack": "input.value='INJECTED'",
     "baseline_meta": {
       "detected": true,
       "domValue": "INJECTED",
@@ -77,7 +77,7 @@
   {
     "scenario": "S4: evasion - property + meta tag co-forgery",
     "target": "memo",
-    "attack": "textarea.value + meta both",
+    "attack": "input.value + meta both",
     "baseline_meta": {
       "detected": false,
       "domValue": "INJECTED",
