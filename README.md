@@ -136,7 +136,10 @@ cd jsdom/case_1
 npm install                 # installs jsdom (required; skipping it gives "Cannot find module 'jsdom'")
 npm run experiment          # prints the detection table and rewrites case1_result.json
 ```
-Case 3 and Case 4 follow the same pattern.
+Case 3 and Case 4 follow the same pattern. Each case folder also has `npm run figures`
+to regenerate its `caseN_fig1_detection.svg`. Case 4 additionally carries a
+`npm run overhead` script (single-run JSDOM timing/payload) that is **provenance only**
+and superseded by the paired runner above — see *Case 4 detail* below.
 
 ## Paper ↔ code mapping
 
@@ -162,6 +165,29 @@ Case 4 = identity-issued reconcile vs keyed reconcile (+ deterministic payload).
 | §6 Case 3 | `jsdom/case_3/` | `results/paired_case3_*.json` |
 | §6 Case 4 | `jsdom/case_4/` | `results/paired_case4_*.json` |
 | cross-engine | `run_browser_detection.mjs` | — |
+
+### Case 4 detail — reconstruction verdict & id provenance
+
+Case 4 (`jsdom/case_4/`) compares three reconstruction models — innerHTML swap, keyed
+reconcile, identity reconciliation — under R1 (same entity, attribute change → state
+**must survive**) and R2 (visually identical form under a **new** authority-issued
+identity → stale state **must be discarded**). Only identity reconciliation satisfies
+both (see the Case 4 headline above and `case4_fig1_detection.svg`).
+
+- **Reconstruction verdict.** `reconstruct()` returns a status in the paper's Runtime
+  Subtree Reconstruction vocabulary: `RECONSTRUCTED` (the existing node links to the new
+  authority-issued lineage → reused, **R1**) or `RECONSTRUCTION_REJECTED` (the node
+  cannot link to the new canonical id → discarded and rebuilt, **R2**). This is the
+  boolean signal for the case: keyed reconcile silently reuses where identity
+  reconciliation rejects.
+- **Id provenance (not circular).** The discriminating id is **not** a string written by
+  the test. An in-process `createReconstructionAuthority()` issues ids: the client
+  submits only a `slot` (position label) and a **lineage token**, and the authority
+  stamps `entity.id` (same token → same id, `revision++`; new token → new id). So in R2
+  the same shape under a new lineage receives a **different** id — which is why identity
+  reconciliation cannot fall into the keyed model's false reuse. Verified at runtime via
+  `idProvenance` / `sameLineageId` / `crossLineageDistinctId` in `case4_result.json`. The
+  authority is an in-process stand-in for the external precondition in *Notes on scope*.
 
 ## Measurement environment
 

@@ -1,0 +1,19 @@
+{
+  "name": "case4-detection",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Case 4 (R1/R2) detection experiment for Structure-Authoritative Runtime Validation: innerHTML swap vs keyed reconcile vs identity reconciliation. Detection only; overhead lives in browser/results/paired_case4_*.json.",
+  "type": "commonjs",
+  "main": "case4_experiment.js",
+  "scripts": {
+    "experiment": "node case4_experiment.js",
+    "figures": "node generate_case4_figures.js",
+    "overhead": "node case4_overhead.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "jsdom": "29.1.1"
+  }
+}

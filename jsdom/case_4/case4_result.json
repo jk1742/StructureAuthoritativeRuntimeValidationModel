@@ -18,7 +18,11 @@
     "description": "identity reconciliation : runtime state preservation",
     "preserved": true,
     "maxlengthApplied": true,
-    "expected": "preserved"
+    "expected": "preserved",
+    "idProvenance": "authority",
+    "sameLineageId": true,
+    "revisionBumped": true,
+    "reconstructionStatus": "RECONSTRUCTED"
   },
   {
     "label": "R2-A",
@@ -39,6 +43,10 @@
     "description": "identity reconciliation : identity-aware reconstruction",
     "valueAfter": "",
     "identityRespected": true,
-    "outcome": "correctly_discarded"
+    "outcome": "correctly_discarded",
+    "idProvenance": "authority",
+    "crossLineageDistinctId": true,
+    "reconstructionStatus": "RECONSTRUCTION_REJECTED",
+    "rejectedCount": 3
   }
 ]

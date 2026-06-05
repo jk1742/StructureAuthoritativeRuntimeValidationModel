@@ -1,16 +1,16 @@
 /**
- * Case 4 - Performance measurement
- *
- * 3-way 비교 : innerHTML swap, keyed reconcile, identity reconciliation
- *
- * 측정 항목
- *  1) Reconstruction time (ms)        : 노드 수별 reconstruction 1회 비용
- *  2) Payload size (bytes)             : server -> client 전송 크기
+ * Case 4 - Performance measurement  (PROVENANCE ONLY — SUPERSEDED)
+ * Measured items
+ *  1) Reconstruction time (ms)        : cost of one reconstruction per node count
+ *  2) Payload size (bytes)            : server -> client transfer size
  *                                         - innerHTML : HTML fragment
  *                                         - keyed     : JSON entity tree (with key)
  *                                         - identity  : JSON entity tree (with id)
  *
  * Node count : 10, 50, 100, 500, 1000, 2000
+ *
+ * Note: the tree-builder ids (e-i) are a stand-in for authority-issued ids.
+ *       They do not affect payload/timing (they are just string identifiers).
  */
 
 const { JSDOM } = require("jsdom");
@@ -55,7 +55,7 @@ function buildHTMLFragment(n) {
   return html;
 }
 
-// 같은 entity 의 attribute만 변경된 reconstruction 입력
+// Reconstruction input where only the attributes of the same entity changed
 function buildUpdatedIdentityTree(n) {
   const children = [];
   for (let i = 0; i < n; i++) {
@@ -89,7 +89,7 @@ function buildUpdatedHTMLFragment(n) {
 }
 
 // ============================================================
-// Models (case4_experiment.js와 동일, 단독 사용을 위해 인라인)
+// Models (identical to case4_experiment.js; inlined here for standalone use)
 // ============================================================
 function applyInnerHTML(parent, newHtml) {
   parent.innerHTML = newHtml;
@@ -154,11 +154,16 @@ function createIdentityReconciler() {
     }
   }
 
+  // reconstruct : identical to case4_experiment.js (rebind + RECONSTRUCTED/RECONSTRUCTION_REJECTED verdict)
   function reconstruct(parent, newTree, doc) {
+    const verdict = { status: "RECONSTRUCTED", reused: [], created: [], rejected: [] };
     function reconcile(parentDom, newChildren) {
       const newIdSet = new Set();
       const finalNodes = [];
-      for (const newChild of newChildren) {
+      const staleAtPos = [];
+      for (let i = 0; i < parentDom.children.length; i++) staleAtPos.push(parentDom.children[i]);
+
+      newChildren.forEach((newChild, i) => {
         newIdSet.add(newChild.id);
         let node;
         const existing = indexMap.get(newChild.id);
@@ -168,18 +173,29 @@ function createIdentityReconciler() {
             node.setAttribute(k, newChild.attrs[k]);
           }
           existing.entity = newChild;
+          weakNodeMap.set(node, newChild.id); // rebind
+          verdict.reused.push(newChild.id);
         } else {
+          const prior = staleAtPos[i];
+          if (prior) {
+            const priorId = weakNodeMap.get(prior);
+            if (priorId && priorId !== newChild.id) {
+              verdict.status = "RECONSTRUCTION_REJECTED";
+              verdict.rejected.push({ position: i, staleId: priorId, canonicalId: newChild.id });
+            }
+          }
           node = doc.createElement(newChild.tag);
           for (const k of Object.keys(newChild.attrs || {})) {
             node.setAttribute(k, newChild.attrs[k]);
           }
           indexMap.set(newChild.id, { entity: newChild, node });
           weakNodeMap.set(node, newChild.id);
+          verdict.created.push(newChild.id);
         }
         finalNodes.push({ node, entity: newChild });
-      }
-      const existingNodes = [];
-      for (let i = 0; i < parentDom.children.length; i++) existingNodes.push(parentDom.children[i]);
+      });
+
+      const existingNodes = staleAtPos;
       for (const oldNode of existingNodes) {
         const oldId = weakNodeMap.get(oldNode);
         if (oldId && !newIdSet.has(oldId)) {
@@ -195,6 +211,7 @@ function createIdentityReconciler() {
       }
     }
     reconcile(parent, newTree.children || []);
+    return verdict;
   }
 
   return { mount, reconstruct };

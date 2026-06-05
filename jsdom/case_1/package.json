@@ -9,6 +9,6 @@
     "case1": "node case1_experiment.mjs"
   },
   "dependencies": {
-    "jsdom": "^24.1.3"
+    "jsdom": "29.1.1"
   }
 }

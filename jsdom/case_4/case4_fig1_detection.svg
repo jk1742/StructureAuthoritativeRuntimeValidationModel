@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="440" viewBox="0 0 800 440" font-family="Helvetica, Arial, sans-serif" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="470" viewBox="0 0 800 470" font-family="Helvetica, Arial, sans-serif" role="img">
 <title>Reconstruction outcome matrix</title>
 <desc>Matrix showing R1 (state preservation) and R2 (identity-aware discard) outcomes across three reconstruction models</desc>
 <style>
@@ -9,31 +9,32 @@
   .title { font-size: 14px; font-weight: bold; fill: #000; }
   .legend { font-size: 12px; fill: #000; }
   .axis-label { font-size: 12px; fill: #000; }
-  .cell-text { font-size: 12px; fill: #000; }
+  .cell-text { font-size: 12px; }
 </style>
-<rect x="0" y="0" width="800" height="440" fill="#FFFFFF"/>
-<text x="400" y="30" text-anchor="middle" class="title">Fig. 6. Runtime Reconstruction Outcome — R1 (preserve) and R2 (discard)</text>
-<text x="385" y="50" text-anchor="middle" class="legend" font-weight="bold">R1: Runtime State Preservation</text>
-<text x="385" y="66" text-anchor="middle" class="tick" fill="#444">(same entity, attribute updated)</text>
-<text x="635" y="50" text-anchor="middle" class="legend" font-weight="bold">R2: Identity-Aware Reconstruction</text>
-<text x="635" y="66" text-anchor="middle" class="tick" fill="#444">(different entity, same shape)</text>
-<text x="248" y="130.66666666666666" text-anchor="end" class="legend">A. innerHTML swap</text>
-<rect x="260" y="80" width="250" height="93.33333333333333" fill="#686868" stroke="#000" stroke-width="1"/>
-<text x="385" y="130.66666666666666" text-anchor="middle" class="cell-text" fill="#000000" font-weight="bold">value lost</text>
-<rect x="510" y="80" width="250" height="93.33333333333333" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
-<text x="635" y="130.66666666666666" text-anchor="middle" class="cell-text" fill="#686868" font-weight="bold">✓ correctly discarded</text>
-<text x="248" y="223.99999999999997" text-anchor="end" class="legend">B. Keyed reconcile</text>
-<rect x="260" y="173.33333333333331" width="250" height="93.33333333333333" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
-<text x="385" y="223.99999999999997" text-anchor="middle" class="cell-text" fill="#686868" font-weight="bold">✓ preserved</text>
-<rect x="510" y="173.33333333333331" width="250" height="93.33333333333333" fill="#686868" stroke="#000" stroke-width="1"/>
-<text x="635" y="223.99999999999997" text-anchor="middle" class="cell-text" fill="#000000" font-weight="bold">✗ false reuse</text>
-<text x="248" y="317.3333333333333" text-anchor="end" class="legend">C. Identity (proposed)</text>
-<rect x="260" y="266.66666666666663" width="250" height="93.33333333333333" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
-<text x="385" y="317.3333333333333" text-anchor="middle" class="cell-text" fill="#686868" font-weight="bold">✓ preserved</text>
-<rect x="510" y="266.66666666666663" width="250" height="93.33333333333333" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
-<text x="635" y="317.3333333333333" text-anchor="middle" class="cell-text" fill="#686868" font-weight="bold">✓ correctly discarded</text>
-<rect x="260" y="400" width="14" height="14" fill="#FFFFFF" stroke="#000"/>
-<text x="280" y="412" class="legend">Expected outcome</text>
-<rect x="440" y="400" width="14" height="14" fill="#686868" stroke="#000"/>
-<text x="460" y="412" class="legend">Unexpected outcome</text>
+<rect x="0" y="0" width="800" height="470" fill="#FFFFFF"/>
+<text x="400" y="30" text-anchor="middle" class="title">Fig. 5. Runtime Reconstruction Outcome — R1 (preserve) and R2 (discard)</text>
+<text x="400" y="50" text-anchor="middle" class="tick" fill="#444">(Only identity reconciliation satisfies both R1 and R2)</text>
+<text x="385" y="80" text-anchor="middle" class="legend" font-weight="bold">R1: Runtime State Preservation</text>
+<text x="385" y="96" text-anchor="middle" class="tick" fill="#444">(same entity, attribute updated)</text>
+<text x="635" y="80" text-anchor="middle" class="legend" font-weight="bold">R2: Identity-Aware Reconstruction</text>
+<text x="635" y="96" text-anchor="middle" class="tick" fill="#444">(different entity, same shape)</text>
+<text x="248" y="160.66666666666666" text-anchor="end" class="legend">A. innerHTML swap</text>
+<rect x="260" y="110" width="250" height="93.33333333333333" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+<text x="385" y="160.66666666666666" text-anchor="middle" class="cell-text" fill="#000000" font-weight="bold">value lost</text>
+<rect x="510" y="110" width="250" height="93.33333333333333" fill="#686868" stroke="#000" stroke-width="1"/>
+<text x="635" y="160.66666666666666" text-anchor="middle" class="cell-text" fill="#FFFFFF" font-weight="bold">✓ correctly discarded</text>
+<text x="248" y="253.99999999999997" text-anchor="end" class="legend">B. Keyed reconcile</text>
+<rect x="260" y="203.33333333333331" width="250" height="93.33333333333333" fill="#686868" stroke="#000" stroke-width="1"/>
+<text x="385" y="253.99999999999997" text-anchor="middle" class="cell-text" fill="#FFFFFF" font-weight="bold">✓ preserved</text>
+<rect x="510" y="203.33333333333331" width="250" height="93.33333333333333" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+<text x="635" y="253.99999999999997" text-anchor="middle" class="cell-text" fill="#000000" font-weight="bold">✗ false reuse</text>
+<text x="248" y="347.3333333333333" text-anchor="end" class="legend">C. Identity (proposed)</text>
+<rect x="260" y="296.66666666666663" width="250" height="93.33333333333333" fill="#686868" stroke="#000" stroke-width="1"/>
+<text x="385" y="347.3333333333333" text-anchor="middle" class="cell-text" fill="#FFFFFF" font-weight="bold">✓ preserved</text>
+<rect x="510" y="296.66666666666663" width="250" height="93.33333333333333" fill="#686868" stroke="#000" stroke-width="1"/>
+<text x="635" y="347.3333333333333" text-anchor="middle" class="cell-text" fill="#FFFFFF" font-weight="bold">✓ correctly discarded</text>
+<rect x="260" y="430" width="14" height="14" fill="#222222" stroke="#000"/>
+<text x="280" y="442" class="legend">Expected outcome</text>
+<rect x="440" y="430" width="14" height="14" fill="#FFFFFF" stroke="#000"/>
+<text x="460" y="442" class="legend">Unexpected outcome</text>
 </svg>

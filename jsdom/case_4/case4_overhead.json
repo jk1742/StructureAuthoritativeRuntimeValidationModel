@@ -2,57 +2,57 @@
   "time": [
     {
       "nodes": 10,
-      "innerHTML_ms": 2.194,
-      "keyed_ms": 2.807,
-      "identity_ms": 1.714,
-      "innerHTML_us_per_node": 219.384,
-      "keyed_us_per_node": 280.659,
-      "identity_us_per_node": 171.399
+      "innerHTML_ms": 1.17,
+      "keyed_ms": 0.831,
+      "identity_ms": 0.612,
+      "innerHTML_us_per_node": 117.049,
+      "keyed_us_per_node": 83.121,
+      "identity_us_per_node": 61.226
     },
     {
       "nodes": 50,
-      "innerHTML_ms": 6.743,
-      "keyed_ms": 3.035,
-      "identity_ms": 2.716,
-      "innerHTML_us_per_node": 134.854,
-      "keyed_us_per_node": 60.7,
-      "identity_us_per_node": 54.32
+      "innerHTML_ms": 4.519,
+      "keyed_ms": 2.565,
+      "identity_ms": 1.713,
+      "innerHTML_us_per_node": 90.383,
+      "keyed_us_per_node": 51.303,
+      "identity_us_per_node": 34.265
     },
     {
       "nodes": 100,
-      "innerHTML_ms": 6.292,
-      "keyed_ms": 8.66,
-      "identity_ms": 18.407,
-      "innerHTML_us_per_node": 62.917,
-      "keyed_us_per_node": 86.605,
-      "identity_us_per_node": 184.065
+      "innerHTML_ms": 4.095,
+      "keyed_ms": 4.414,
+      "identity_ms": 3.842,
+      "innerHTML_us_per_node": 40.952,
+      "keyed_us_per_node": 44.137,
+      "identity_us_per_node": 38.424
     },
     {
       "nodes": 500,
-      "innerHTML_ms": 29.981,
-      "keyed_ms": 63.968,
-      "identity_ms": 51.894,
-      "innerHTML_us_per_node": 59.962,
-      "keyed_us_per_node": 127.935,
-      "identity_us_per_node": 103.787
+      "innerHTML_ms": 14.177,
+      "keyed_ms": 54.566,
+      "identity_ms": 56.827,
+      "innerHTML_us_per_node": 28.353,
+      "keyed_us_per_node": 109.132,
+      "identity_us_per_node": 113.655
     },
     {
       "nodes": 1000,
-      "innerHTML_ms": 30.219,
-      "keyed_ms": 164.224,
-      "identity_ms": 152.851,
-      "innerHTML_us_per_node": 30.219,
-      "keyed_us_per_node": 164.224,
-      "identity_us_per_node": 152.851
+      "innerHTML_ms": 35.206,
+      "keyed_ms": 194.84,
+      "identity_ms": 215.734,
+      "innerHTML_us_per_node": 35.206,
+      "keyed_us_per_node": 194.84,
+      "identity_us_per_node": 215.734
     },
     {
       "nodes": 2000,
-      "innerHTML_ms": 98.655,
-      "keyed_ms": 986.002,
-      "identity_ms": 1095.087,
-      "innerHTML_us_per_node": 49.327,
-      "keyed_us_per_node": 493.001,
-      "identity_us_per_node": 547.544
+      "innerHTML_ms": 61.865,
+      "keyed_ms": 822.799,
+      "identity_ms": 881.172,
+      "innerHTML_us_per_node": 30.932,
+      "keyed_us_per_node": 411.4,
+      "identity_us_per_node": 440.586
     }
   ],
   "payload": [
