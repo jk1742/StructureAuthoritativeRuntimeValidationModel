@@ -1,4 +1,4 @@
-// model-form.mjs
+// model-core.mjs
 // Structure-authoritative validation for a single <form data-role="module"> subtree.
 // Registry shape (two maps):
 //   - nodeToId : WeakMap  DOM node  -> entity id        (the paper's WeakNodeMap; weak, does not block GC)
@@ -7,7 +7,7 @@
 // records the entity ids it reaches, and any non-text canonical entity left unreached
 // corresponds to a removed node. Node references live only in the weak nodeToId map, so a
 // removed subtree stays collectible -- the property the paper's WeakNodeMap is chosen for.
-// (Production velunit keeps a maintained id->node map, refreshed on every legitimate
+// (A production implementation keeps a maintained id->node map, refreshed on every legitimate
 //  mutation; this artifact omits it to show the minimal weak-binding form.)
 //
 // The canonical entity tree is HIERARCHICAL (children nested); on load it is walked
@@ -15,10 +15,15 @@
 //
 // The entity IS the truth: a field present on the entity must match; anything not on
 // the entity (style, class, text content) is free to change on the client.
-// Entity shape: { id, parentId, order, type, value, children:[...] }
+// Entity shape: { id, parentId, order, type, value?, checked?, children:[...] }
 //   - type "#text": existence/order only (content not validated).
-//   - value: truth updated ONLY through commit() (the demo stand-in for syncFromNode);
-//     a direct DOM forgery never goes through commit and is therefore detected.
+//   - value / checked: runtime-state truth, updated ONLY through commit() (the demo
+//     stand-in for syncFromNode). `checked` applies to checkbox/radio, `value` to
+//     other value-carrying elements. A direct DOM forgery never goes through commit,
+//     so it leaves the entity truth unchanged; validate detects it as a mismatch
+//     whenever the forged state differs from the committed truth. (A direct write
+//     that happens to equal the committed truth produces no state difference and is
+//     therefore not a forgery of state.)
 // entity.id is an authority-issued id carried in canonical.json (NOT the DOM id attr).
 
 export function createRegistry(doc) {
@@ -37,6 +42,9 @@ export function createRegistry(doc) {
   }
 
   function mirrorChildren(node) {
+    // A <textarea>'s text content is its runtime-state value (validated via .value),
+    // not structure, so treat it as a value-carrying leaf: do not mirror its children.
+    if (node.nodeType === 1 && node.tagName.toLowerCase() === "textarea") return [];
     const out = [];
     for (const n of node.childNodes) {
       if (n.nodeType === 1) out.push(n);
@@ -58,10 +66,19 @@ export function createRegistry(doc) {
     if (c.type !== nodeType(node))
       throw new Error(`STRUCTURAL_DEVIATION: type mismatch (expected ${c.type}, got ${nodeType(node)})`);
 
-    // value truth (commit-updated), elements that carry a value only
-    if (c.value !== undefined && c.value !== null && node.nodeType === 1 && "value" in node) {
-      if (String(node.value) !== String(c.value))
-        throw new Error(`RUNTIME_STATE_FORGERY: value expected ${JSON.stringify(c.value)}, got ${JSON.stringify(node.value)} (not committed)`);
+    // Runtime-state truth (commit-updated). The canonical entity names which
+    // property carries the state: `checked` for checkbox/radio, otherwise `value`.
+    // A field present on the entity must match the live node; a direct DOM forgery
+    // never goes through commit and so leaves the entity truth unchanged, which is
+    // detected here as a value/checked mismatch.
+    if (node.nodeType === 1) {
+      if (c.checked !== undefined && c.checked !== null && "checked" in node) {
+        if (Boolean(node.checked) !== Boolean(c.checked))
+          throw new Error(`RUNTIME_STATE_FORGERY: checked expected ${JSON.stringify(Boolean(c.checked))}, got ${JSON.stringify(Boolean(node.checked))} (not committed)`);
+      } else if (c.value !== undefined && c.value !== null && "value" in node) {
+        if (String(node.value) !== String(c.value))
+          throw new Error(`RUNTIME_STATE_FORGERY: value expected ${JSON.stringify(c.value)}, got ${JSON.stringify(node.value)} (not committed)`);
+      }
     }
 
     // structure: position-wise child comparison (count check catches insertion/removal-under-live-parent)
@@ -103,14 +120,18 @@ export function createRegistry(doc) {
     return true;
   }
 
-  // commit = demo stand-in for syncFromNode: the only approved path into entity.value.
+  // commit = demo stand-in for syncFromNode: the only approved path into the
+  // entity's runtime-state truth (value or checked, matching the entity shape).
   function commit(node) {
     const id = nodeToId.get(node);
     if (id === undefined) throw new Error("commit on unbound node");
     const c = indexMap.get(id);
-    if (c.value !== undefined && c.value !== null && "value" in node) c.value = String(node.value);
+    if (c.checked !== undefined && c.checked !== null && "checked" in node) c.checked = Boolean(node.checked);
+    else if (c.value !== undefined && c.value !== null && "value" in node) c.value = String(node.value);
     return true;
   }
 
   return { mount, validate, commit };
 }
+
+

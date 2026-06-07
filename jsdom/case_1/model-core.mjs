@@ -1,4 +1,4 @@
-// model-form.mjs
+// model-core.mjs
 // Structure-authoritative validation for a single <form data-role="module"> subtree.
 // Registry shape (two maps):
 //   - nodeToId : WeakMap  DOM node  -> entity id        (the paper's WeakNodeMap; weak, does not block GC)
@@ -42,6 +42,9 @@ export function createRegistry(doc) {
   }
 
   function mirrorChildren(node) {
+    // A <textarea>'s text content is its runtime-state value (validated via .value),
+    // not structure, so treat it as a value-carrying leaf: do not mirror its children.
+    if (node.nodeType === 1 && node.tagName.toLowerCase() === "textarea") return [];
     const out = [];
     for (const n of node.childNodes) {
       if (n.nodeType === 1) out.push(n);

@@ -132,5 +132,27 @@ export function runPaired({ case: kase, makeDoc, now, nodeCounts, repeat = 30, w
   if (kase === "case4") {
     result.payload = counts.map((n) => { const t = c4Trees(n, true); const html = (function (m) { let h = ""; for (let i = 0; i < m; i++) h += `<input type="text" name="f-${i}" value="v-${i}" maxlength="64">`; return h; })(n); const kb = utf8Len(JSON.stringify(t.keyed)), ib = utf8Len(JSON.stringify(t.id)); return { nodes: n, innerHTML_bytes: utf8Len(html), keyed_bytes: kb, identity_bytes: ib, identity_vs_keyed_pct: +(((ib - kb) / kb) * 100).toFixed(2) }; });
   }
+  if (kase === "case1") {
+    // Document size is engine-independent (deterministic), so this is computed once,
+    // mirroring case4's payload. baseline DOM = inputs + one in-DOM <meta> truth per
+    // field (the c1Baseline construction) -> node count 2n; proposed DOM = inputs only
+    // (truth held outside the DOM). We record the arithmetic node count AND the measured
+    // serialized-byte ratio separately.
+    result.payload = counts.map((n) => {
+      const baseDoc = makeDoc(); const inputs = c1Build(baseDoc, n);
+      for (const { id, truth } of inputs) {
+        const m = baseDoc.createElement("meta");
+        m.setAttribute("name", `truth:${id}`); m.setAttribute("content", truth);
+        baseDoc.head.appendChild(m);
+      }
+      const propDoc = makeDoc(); c1Build(propDoc, n);
+      const baseBytes = utf8Len(baseDoc.documentElement.outerHTML);
+      const propBytes = utf8Len(propDoc.documentElement.outerHTML);
+      closeDoc(baseDoc); closeDoc(propDoc);
+      return { nodes: n, baseline_nodes: 2 * n, proposed_nodes: n,
+        baseline_bytes: baseBytes, proposed_bytes: propBytes,
+        proposed_vs_baseline_ratio: +(propBytes / baseBytes).toFixed(4) };
+    });
+  }
   return result;
 }

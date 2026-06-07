@@ -1,5 +1,5 @@
 /**
- * Case 3 figure 생성
+ * Case 3 figure generation
  * - case3_fig1_detection.svg : T1~T4 detection matrix
  */
 
@@ -21,7 +21,7 @@ function svgHeader(w, h, title, desc) {
   .title { font-size: 14px; font-weight: bold; fill: #000; }
   .legend { font-size: 12px; fill: #000; }
   .axis-label { font-size: 12px; fill: #000; }
-  .cell-text { font-size: 12px; fill: #000; }
+  .cell-text { font-size: 12px; }
   .cell-detected { fill: #222222; }
   .cell-missed   { fill: #FFFFFF; }
   .cell-valid    { fill: #DDDDDD; }
@@ -51,14 +51,14 @@ function makeFig() {
   const cellH = plotH / scenarios.length;
 
   const stateFill = (state) => {
-    if (state === "MISSED")   return "#FFFFFF";   // 비어 있음 = 놓침
-    if (state === "Detected") return "#222222";
-    if (state === "VALID")    return "#BBBBBB";   // 회색 = 정상 통과(대조군)
+    if (state === "MISSED")   return "#686868";   // empty = missed
+    if (state === "Detected") return "#FFFFFF";
+    if (state === "VALID")    return "#BBBBBB";   // gray = clean pass (control)
     return "#FFFFFF";
   };
   const stateText = (state) => {
-    if (state === "Detected") return { color: "#FFF", label: "✓ Detected" };
-    if (state === "MISSED")   return { color: "#000", label: "✗ MISSED" };
+    if (state === "Detected") return { color: "#000", label: "✓ Detected" };
+    if (state === "MISSED")   return { color: "#FFF", label: "✗ MISSED" };
     if (state === "VALID")    return { color: "#000", label: "  valid" };
     return { color: "#000", label: "" };
   };
@@ -110,3 +110,4 @@ function makeFig() {
 makeFig();
 console.log("Generated:");
 console.log("  " + path.join(OUT_DIR, "case3_fig1_detection.svg"));
+

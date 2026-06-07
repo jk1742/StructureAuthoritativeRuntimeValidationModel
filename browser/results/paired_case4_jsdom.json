@@ -6,73 +6,73 @@
   "rows": [
     {
       "nodes": 10,
-      "ratio_median": 0.9562,
+      "ratio_median": 1.0068,
       "ratio_iqr": [
-        0.9533,
-        0.9595
+        0.9903,
+        1.0187
       ],
-      "baseline_ms_median": 0.3887,
-      "proposed_ms_median": 0.37
+      "baseline_ms_median": 0.2133,
+      "proposed_ms_median": 0.2165
     },
     {
       "nodes": 50,
-      "ratio_median": 0.9643,
+      "ratio_median": 0.9786,
       "ratio_iqr": [
-        0.9569,
-        0.9748
+        0.974,
+        0.9866
       ],
-      "baseline_ms_median": 2.4487,
-      "proposed_ms_median": 2.3589
+      "baseline_ms_median": 1.3894,
+      "proposed_ms_median": 1.356
     },
     {
       "nodes": 100,
-      "ratio_median": 0.9534,
+      "ratio_median": 0.8285,
       "ratio_iqr": [
-        0.9512,
-        0.9557
+        0.7632,
+        0.9124
       ],
-      "baseline_ms_median": 6.5392,
-      "proposed_ms_median": 6.2117
+      "baseline_ms_median": 4.7958,
+      "proposed_ms_median": 3.6304
     },
     {
       "nodes": 200,
-      "ratio_median": 0.9998,
+      "ratio_median": 0.9806,
       "ratio_iqr": [
-        0.9918,
-        1.0065
+        0.9719,
+        1.011
       ],
-      "baseline_ms_median": 20.4216,
-      "proposed_ms_median": 20.2631
+      "baseline_ms_median": 11.6604,
+      "proposed_ms_median": 11.5675
     },
     {
       "nodes": 500,
-      "ratio_median": 1.0464,
+      "ratio_median": 1.0477,
       "ratio_iqr": [
-        1.0388,
-        1.0704
+        1.0342,
+        1.057
       ],
-      "baseline_ms_median": 105.4082,
-      "proposed_ms_median": 113.6934
+      "baseline_ms_median": 59.2186,
+      "proposed_ms_median": 61.7958
     },
     {
       "nodes": 1000,
-      "ratio_median": 1.0967,
+      "ratio_median": 1.0658,
       "ratio_iqr": [
-        1.0883,
-        1.1074
+        1.0573,
+        1.0757
       ],
-      "baseline_ms_median": 343.5478,
-      "proposed_ms_median": 377.6999
+      "baseline_ms_median": 192.6247,
+      "proposed_ms_median": 207.1324
     },
     {
       "nodes": 2000,
-      "ratio_median": 1.0213,
+      "ratio_median": 1.0206,
       "ratio_iqr": [
-        1.0199,
-        1.0342
+        1.0073,
+        1.0265
       ],
-      "baseline_ms_median": 1495.8428,
-      "proposed_ms_median": 1532.7509
+      "baseline_ms_median": 823.1519,
+      "proposed_ms_median": 831.1892
     }
   ],
   "config": {

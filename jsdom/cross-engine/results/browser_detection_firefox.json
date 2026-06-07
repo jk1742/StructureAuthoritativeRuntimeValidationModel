@@ -1,0 +1,27 @@
+{
+  "engine": "firefox",
+  "engineVersion": "150.0.2",
+  "rows": [
+    {
+      "id": "S4",
+      "label": "evasion forgery (value + meta)",
+      "expected": "detected",
+      "detected": true,
+      "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+    },
+    {
+      "id": "T1",
+      "label": "identical-form replacement",
+      "expected": "detected",
+      "detected": true,
+      "reason": "STRUCTURAL_DEVIATION: unauthorized/displaced child"
+    },
+    {
+      "id": "control",
+      "label": "valid state",
+      "expected": "not detected",
+      "detected": false,
+      "reason": null
+    }
+  ]
+}

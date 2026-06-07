@@ -11,52 +11,52 @@
   },
   {
     "nodes": 50,
-    "snapshot_setup_ms": 0.836,
-    "identity_setup_ms": 0.877,
-    "snapshot_validate_ms": 0.914,
-    "identity_validate_ms": 0.774,
-    "snapshot_us_per_node": 18.282,
-    "identity_us_per_node": 15.474,
-    "speedup_x": 1.18
+    "snapshot_setup_ms": 0.64,
+    "identity_setup_ms": 0.554,
+    "snapshot_validate_ms": 0.475,
+    "identity_validate_ms": 0.589,
+    "snapshot_us_per_node": 9.507,
+    "identity_us_per_node": 11.77,
+    "speedup_x": 0.81
   },
   {
     "nodes": 100,
-    "snapshot_setup_ms": 2.375,
-    "identity_setup_ms": 0.672,
-    "snapshot_validate_ms": 1.626,
-    "identity_validate_ms": 0.71,
-    "snapshot_us_per_node": 16.265,
-    "identity_us_per_node": 7.095,
-    "speedup_x": 2.29
+    "snapshot_setup_ms": 1.894,
+    "identity_setup_ms": 1.395,
+    "snapshot_validate_ms": 0.894,
+    "identity_validate_ms": 0.985,
+    "snapshot_us_per_node": 8.935,
+    "identity_us_per_node": 9.854,
+    "speedup_x": 0.91
   },
   {
     "nodes": 500,
-    "snapshot_setup_ms": 11.415,
-    "identity_setup_ms": 11.963,
-    "snapshot_validate_ms": 11.828,
-    "identity_validate_ms": 11.656,
-    "snapshot_us_per_node": 23.656,
-    "identity_us_per_node": 23.313,
-    "speedup_x": 1.01
+    "snapshot_setup_ms": 23.329,
+    "identity_setup_ms": 16.913,
+    "snapshot_validate_ms": 16.824,
+    "identity_validate_ms": 17.732,
+    "snapshot_us_per_node": 33.647,
+    "identity_us_per_node": 35.463,
+    "speedup_x": 0.95
   },
   {
     "nodes": 1000,
-    "snapshot_setup_ms": 82.699,
-    "identity_setup_ms": 74.024,
-    "snapshot_validate_ms": 70.806,
-    "identity_validate_ms": 65.237,
-    "snapshot_us_per_node": 70.806,
-    "identity_us_per_node": 65.237,
-    "speedup_x": 1.09
+    "snapshot_setup_ms": 69.137,
+    "identity_setup_ms": 62.8,
+    "snapshot_validate_ms": 59.794,
+    "identity_validate_ms": 61.233,
+    "snapshot_us_per_node": 59.794,
+    "identity_us_per_node": 61.233,
+    "speedup_x": 0.98
   },
   {
     "nodes": 2000,
-    "snapshot_setup_ms": 352.841,
-    "identity_setup_ms": 323.874,
-    "snapshot_validate_ms": 307.74,
-    "identity_validate_ms": 304.062,
-    "snapshot_us_per_node": 153.87,
-    "identity_us_per_node": 152.031,
-    "speedup_x": 1.01
+    "snapshot_setup_ms": 327.021,
+    "identity_setup_ms": 320.989,
+    "snapshot_validate_ms": 370.26,
+    "identity_validate_ms": 326.11,
+    "snapshot_us_per_node": 185.13,
+    "identity_us_per_node": 163.055,
+    "speedup_x": 1.14
   }
 ]

@@ -1,23 +1,17 @@
 {
-  "name": "structure-authoritative-validation-browser",
+  "name": "structure-authoritative-validation-overhead",
   "version": "1.0.0",
   "private": true,
-  "description": "Cross-environment reproduction (Chromium + Firefox + JSDOM) of the Structure-Authoritative Runtime Validation model: detection and per-case runtime overhead / payload, via a minimal reference implementation (Algorithm 1 + Section 4.1 registry).",
+  "description": "Paired-ratio runtime overhead and serialized-payload measurement for Cases 1/3/4 of the Structure-Authoritative Runtime Validation model, across Chromium, Firefox (Playwright) and JSDOM. Detection experiments live under jsdom/.",
   "type": "module",
   "scripts": {
-    "detect": "node run_browser_detection.mjs",
-    "bench:case1": "node run_browser_benchmark.mjs",
-    "bench:case3": "node run_browser_case3.mjs",
-    "bench:case4": "node run_browser_case4.mjs",
-    "jsdom:case1": "node bench-node.mjs",
-    "jsdom:case3": "node bench-node-case3.mjs",
-    "jsdom:case4": "node bench-node-case4.mjs",
+    "setup": "playwright install chromium firefox",
     "paired": "node run_paired.mjs",
     "paired:jsdom": "node bench-node-paired.mjs"
   },
   "license": "ISC",
   "devDependencies": {
-    "jsdom": "^24.1.3",
+    "jsdom": "29.1.1",
     "playwright": "^1.60.0"
   }
 }

@@ -21,12 +21,8 @@ No personally identifying information is included; all paths are relative.
 ├── README.md
 ├── results_dashboard.html              # results overview (self-contained; loads Chart.js from a CDN)
 │
-├── browser/                            # reference implementation + measurement (ES modules)
+├── browser/                            # reference implementation + overhead measurement (ES modules)
 │   ├── model-core.mjs                  # minimal reference implementation (no dependencies)
-│   ├── scenarios.mjs                   # S4 / T1 / control scenario definitions
-│   │
-│   ├── detection_harness.html          # harness loaded by the Playwright detection runner
-│   ├── run_browser_detection.mjs       # Playwright detection runner (Chromium + Firefox)
 │   │
 │   ├── bench-stats.mjs                 # paired-ratio measurement + median/IQR aggregation
 │   ├── bench-core-paired.mjs           # unified paired core for Case 1 / 3 / 4 (+ payload)
@@ -36,27 +32,34 @@ No personally identifying information is included; all paths are relative.
 │   ├── bench-node-paired.mjs           # JSDOM-only paired runner (quick local check)
 │   │
 │   ├── package.json
-│   └── results/                        # captured measurements (committed JSON)
-│       ├── browser_detection_chromium.json / browser_detection_firefox.json
+│   └── results/                        # captured overhead measurements (committed JSON)
 │       └── paired_case{1,3,4}_{chromium,firefox,jsdom}.json
 │
-├── jsdom/                              # per-case detection experiments + detection figures (CommonJS)
-│   ├── case_1/  case1_experiment.js, case1_result.json, case1_fig1_detection.svg, ...
-│   ├── case_3/  case3_experiment.js, case3_result.json, case3_fig1_detection.svg, ...
-│   └── case_4/  case4_experiment.js, case4_result.json, case4_fig1_detection.svg, ...
+├── jsdom/                              # per-case detection experiments + live-browser cross-engine confirmation
+│   ├── case_1/        case1_experiment.mjs, case1_result.json
+│   ├── case_3/        case3_experiment.js, case3_result.json, case3_fig1_detection.svg, case3_overhead.{js,json}, ...
+│   ├── case_4/        case4_experiment.js, case4_result.json, case4_fig1_detection.svg, case4_overhead.{js,json}, ...
+│   └── cross-engine/                   # ⭐ live-browser detection (Playwright)
+│       ├── scenarios.mjs               # S4 / T1 / control, reusing the demo's registry model
+│       ├── detection_harness.html      # harness loaded by the Playwright detection runner
+│       ├── run_browser_detection.mjs   # ⭐ detection runner: JSDOM + Chromium + Firefox
+│       ├── model-core.mjs              # registry reused by the harness (value-only variant)
+│       ├── package.json
+│       └── results/browser_detection_{chromium,firefox,jsdom}.json
 │
-│   (plus)
 └── form-node/                              # interactive browser demo (login form)
     ├── demo.html                           # ⭐ the interactive demo entry point
-    ├── model-form.mjs                      # demo registry (createRegistry)
+    ├── model-core.mjs                      # demo registry (createRegistry)
     └── canonical.json                      # authority-issued entity tree (static stand-in)
 ```
 
 > **Overhead source of truth.** All timing/payload numbers in the paper and in
-> `results_dashboard.html` come from the **paired runner** (`run_paired.mjs`,
-> `results/paired_*.json`). The `jsdom/` case folders provide the **detection**
-> experiments and detection figures; any earlier single-run timing scripts there are
-> superseded by the paired protocol and retained only for provenance.
+> `results_dashboard.html` come from the **paired runner** (`browser/run_paired.mjs`,
+> `browser/results/paired_*.json`). The `jsdom/case_*/` folders provide the
+> **detection** experiments and detection figures, and `jsdom/cross-engine/` provides
+> the live-browser cross-engine confirmation; any earlier single-run timing scripts in
+> the case folders are superseded by the paired protocol and retained only for
+> provenance.
 
 ## Results at a glance
 
@@ -74,16 +77,19 @@ Headline outcomes:
   0.69× (Chromium) / 0.50× (Firefox) of the baseline at 2,000 nodes, same O(N) order
   (proposed is faster because it avoids a per-field DOM read).
 - **Case 3 (T1 stale-subtree):** an identical-form replacement is **missed** by
-  snapshot-diff but **detected** by identity continuity. Validation is the same O(N)
-  order, but the ratio is **engine-dependent** (about 0.74–1.17 across engines: near
-  parity on Chromium, slightly higher on Firefox, and lower under JSDOM at large N,
-  where the snapshot baseline's per-validation array allocation degrades faster). The
-  **detection result — not a single overhead figure — is the claim for this case.**
+  snapshot-diff but **detected** by identity continuity. Validation runs the **full
+  Algorithm 1** (forward structure validation + removal sweep) and stays at **near
+  parity** with snapshot-diff in the same O(N) order — about 0.97–1.09× on Chromium and
+  0.95–1.05× on JSDOM (Firefox spans 0.67–1.07, but its sub-millisecond timings are
+  coarsely quantized). At 2,000 nodes Chromium is 0.53 ms (baseline) vs 0.58 ms
+  (proposed). The **detection result — not a single overhead figure — is the claim for
+  this case.**
 - **Case 4 (R1/R2):** only identity reconciliation both **preserves** runtime state (R1)
   and **discards** stale state under a new authority-issued identity (R2). Reconstruction
   cost stays within about 14% of keyed reconcile (median 0.86–1.10 across engines);
   payloads differ by under 1%.
-- **Cross-engine:** S4 and T1 reproduce identically on Chromium 148 and Firefox 150.
+- **Cross-engine:** S4 and T1 reproduce identically on Chromium 148 and Firefox 150
+  (and JSDOM), with the control scenario reporting *not detected* on every engine.
 
 ## Reproduce
 
@@ -107,10 +113,11 @@ the hands-on counterpart to the automated detection run in step B.
 ### B. Cross-engine detection (automated)
 
 ```bash
-cd browser
+cd jsdom/cross-engine
 npm install
-npx playwright install            # downloads Chromium and Firefox
-node run_browser_detection.mjs    # -> results/browser_detection_<engine>.json
+npm run setup                     # playwright install — downloads Chromium and Firefox
+npm run detect                    # -> results/browser_detection_<engine>.json
+# (equivalently: node run_browser_detection.mjs)
 ```
 
 ### C. Overhead — paired ratio across three environments
@@ -136,10 +143,12 @@ cd jsdom/case_1
 npm install                 # installs jsdom (required; skipping it gives "Cannot find module 'jsdom'")
 npm run experiment          # prints the detection table and rewrites case1_result.json
 ```
-Case 3 and Case 4 follow the same pattern. Each case folder also has `npm run figures`
-to regenerate its `caseN_fig1_detection.svg`. Case 4 additionally carries a
-`npm run overhead` script (single-run JSDOM timing/payload) that is **provenance only**
-and superseded by the paired runner above — see *Case 4 detail* below.
+
+Case 3 and Case 4 follow the same `npm run experiment` pattern. **Case 3 and Case 4**
+additionally provide `npm run figures` (regenerates `caseN_fig1_detection.svg`) and
+`npm run overhead` (single-run JSDOM timing/payload that is **provenance only** and
+superseded by the paired runner above — see *Case 4 detail* below). Case 1 carries the
+detection experiment only (no figure or overhead script).
 
 ## Paper ↔ code mapping
 
@@ -148,11 +157,12 @@ The minimal reference implementation lives in `browser/model-core.mjs`.
 | Concept in the paper | Symbol in `model-core.mjs` |
 |---|---|
 | Registry kept outside the DOM | `createRegistry()` |
-| WeakNodeMap (live node → entity id) | `weakNodeMap` |
+| Registration of a subtree against its canonical tree | `mount()` |
+| WeakNodeMap (live node → entity id) | `nodeToId` (a `WeakMap`) |
 | indexMap (entity id → canonical entity) | `indexMap` |
 | Runtime *truth* outside the DOM | held in the registry closure (never in the DOM) |
-| Canonical structure validation (parent → sibling → recurse) | `validateStructure()` |
-| Runtime state validation | `validateRuntimeState()` |
+| Canonical structure validation (type / parent / sibling order / child-count) | `validate()` → `validateNode()` (forward pass) + `reverseRemovalSweep()` (removal sweep) |
+| Runtime state validation (value vs committed truth) | `validateNode()` (raises `RUNTIME_STATE_FORGERY`) |
 | Interaction propagation channel | `commit()` |
 
 Overhead measurement per case (in `bench-core-paired.mjs`): Case 1 = closure registry
@@ -161,10 +171,10 @@ Case 4 = identity-issued reconcile vs keyed reconcile (+ deterministic payload).
 
 | Paper | Detection | Overhead |
 |---|---|---|
-| §6 Case 1 | `jsdom/case_1/`, `scenarios.mjs` | `results/paired_case1_*.json` |
-| §6 Case 3 | `jsdom/case_3/` | `results/paired_case3_*.json` |
-| §6 Case 4 | `jsdom/case_4/` | `results/paired_case4_*.json` |
-| cross-engine | `run_browser_detection.mjs` | — |
+| §6 Case 1 | `jsdom/case_1/` | `browser/results/paired_case1_*.json` |
+| §6 Case 3 | `jsdom/case_3/` | `browser/results/paired_case3_*.json` |
+| §6 Case 4 | `jsdom/case_4/` | `browser/results/paired_case4_*.json` |
+| cross-engine | `jsdom/cross-engine/run_browser_detection.mjs` | — |
 
 ### Case 4 detail — reconstruction verdict & id provenance
 
@@ -180,15 +190,7 @@ both (see the Case 4 headline above and `case4_fig1_detection.svg`).
   cannot link to the new canonical id → discarded and rebuilt, **R2**). This is the
   boolean signal for the case: keyed reconcile silently reuses where identity
   reconciliation rejects.
-- **Id provenance (not circular).** The discriminating id is **not** a string written by
-  the test. An in-process `createReconstructionAuthority()` issues ids: the client
-  submits only a `slot` (position label) and a **lineage token**, and the authority
-  stamps `entity.id` (same token → same id, `revision++`; new token → new id). So in R2
-  the same shape under a new lineage receives a **different** id — which is why identity
-  reconciliation cannot fall into the keyed model's false reuse. Verified at runtime via
-  `idProvenance` / `sameLineageId` / `crossLineageDistinctId` in `case4_result.json`. The
-  authority is an in-process stand-in for the external precondition in *Notes on scope*.
-
+- **ID provenance (non-circular).** The discriminating identifier is **not** a string manually written by the test. Instead, identifiers are issued by an in-process `createReconstructionAuthority()`: the client submits only a `slot` (position label) and a **lineage token**, while the authority assigns `entity.id` (same token → same id with `revision increment`; new token → new id). Consequently, in R2, an identical shape under a new lineage receives a **different** identifier, preventing identity reconciliation from falling into the false-reuse behavior of keyed models. This behavior is verified at runtime through `idProvenance`, `sameLineageId`, and `crossLineageDistinctId` in case4_result.json. The authority serves as an in-process stand-in for the external precondition described in *Notes on scope*.
 ## Measurement environment
 
 The committed `results/paired_*.json` were produced on:

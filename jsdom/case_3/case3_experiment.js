@@ -1,36 +1,36 @@
 /**
  * Case 3: Snapshot Diff vs Identity Continuity
  *
- * 비교 모델 (둘 다 최소 구조)
+ * Compared models (both minimal)
  *  (A) Snapshot-diff Baseline
- *      - 등록 시점에 DOM tree를 평면 snapshot으로 직렬화
+ *      - serialize the DOM tree into a flat snapshot at registration time
  *        ([{path, tag, value}, ...])
- *      - 검증 시 현재 DOM을 다시 직렬화하여 diff 비교
- *      - 형태(shape) 기반 비교
+ *      - on validation, re-serialize the current DOM and compare by diff
+ *      - shape-based comparison
  *
- *  (B) Identity Continuity (Proposed, 경량)
+ *  (B) Identity Continuity (Proposed, lightweight)
  *      - indexMap     : id -> entity { id, tag, truth, parentId, idx }
  *      - weakNodeMap  : node -> id
- *      - 검증 시 현재 DOM node가 등록 시점의 entity와 동일한 binding을 유지하는지 검사
- *      - identity 기반 비교 (WeakNodeMap binding 유지 여부)
+ *      - on validation, check the current DOM node keeps the same binding to its registration-time entity
+ *      - identity-based comparison (whether the WeakNodeMap binding is preserved)
  *
- * 시나리오
+ * Scenarios
  *  T1. Identical replacement
- *      - 동일한 tag/value/structure의 subtree로 교체
- *      - Snapshot-diff: VALID (잘못 통과)
- *      - Identity:      INVALID (binding 단절 탐지)
+ *      - replace with a subtree of identical tag/value/structure
+ *      - Snapshot-diff: VALID (false pass)
+ *      - Identity:      INVALID (binding break detected)
  *
  *  T2. Genuine no-op
- *      - 아무것도 바꾸지 않음 (대조군)
- *      - 두 모델 모두 VALID
+ *      - change nothing (control)
+ *      - both models VALID
  *
  *  T3. Value mutation
- *      - input.value를 단순 변조
- *      - 두 모델 모두 INVALID 탐지
+ *      - simple tampering of input.value
+ *      - both models detect INVALID
  *
  *  T4. Structural insertion
- *      - 새 node 삽입
- *      - 두 모델 모두 INVALID 탐지
+ *      - insert a new node
+ *      - both models detect INVALID
  */
 
 const { JSDOM } = require("jsdom");
@@ -41,8 +41,8 @@ const { performance } = require("perf_hooks");
 // ============================================================
 const SnapshotBaseline = {
   /**
-   * DOM tree를 평면 배열로 직렬화
-   * path: root부터의 child index 경로
+   * Serialize the DOM tree into a flat array
+   * path: child-index path from the root
    */
   snapshot(root) {
     const out = [];
@@ -61,9 +61,9 @@ const SnapshotBaseline = {
   },
 
   /**
-   * 두 snapshot의 diff를 계산
-   * - 같은 path에 다른 tag/value -> mismatch
-   * - 한쪽에만 존재 -> mismatch
+   * Compute the diff between two snapshots
+   * - same path with different tag/value -> mismatch
+   * - present on only one side -> mismatch
    */
   diff(prev, curr) {
     const mismatches = [];
@@ -118,7 +118,7 @@ function createIdentityRegistry() {
   function validateNode(node) {
     if (node.nodeType !== 1) return true;
     const id = weakNodeMap.get(node);
-    if (!id) return false;                   // identity binding 단절
+    if (!id) return false;                   // identity binding broken
     const entity = indexMap.get(id);
     if (!entity) return false;
     if (entity.tag !== node.tagName.toLowerCase()) return false;
@@ -129,21 +129,81 @@ function createIdentityRegistry() {
     return true;
   }
 
+  /**
+   * Forward Structure Validation + Removal Sweep (paper Algorithm 1 / 1b)
+   *
+   * Forward pass (traverse the DOM from the root)
+   *   1) WeakNodeMap.get(node) == null            -> binding_broken (STRUCTURAL_DEVIATION)
+   *   2) indexMap.get(id) == null                 -> no_canonical_entity
+   *   3) tag mismatch                            -> tag_mismatch
+   *   4) parent binding != canonical parentId      -> parent_mismatch
+   *   5) sibling order != canonical idx            -> order_mismatch
+   *   6) runtime truth mismatch                  -> value_mismatch
+   *   - mark passed entities as reached (reachability marking)
+   *   - do not descend below a node whose binding is broken
+   *   - sibling position is passed from the traversal loop index (O(1)/node) -> overall O(N)
+   *
+   * Removal Sweep
+   *   - canonical entities not reached -> removed (registered but vanished nodes)
+   */
   function validateAll(root) {
     const issues = [];
-    function walk(node) {
+    const reached = new Set();
+
+    function walk(node, isRoot, posInParent) {
       if (node.nodeType !== 1) return;
-      if (!validateNode(node)) {
-        issues.push({ tag: node.tagName.toLowerCase(), reason: "identity_or_value" });
-      }
-      // identity가 끊긴 노드의 children은 더 깊이 들어가지 않음 (불필요한 cascade 방지)
+
       const id = weakNodeMap.get(node);
-      if (id) {
-        const kids = node.children;
-        for (let i = 0; i < kids.length; i++) walk(kids[i]);
+      if (!id) {
+        // identity binding broken (e.g., a new node swapped in with identical shape)
+        issues.push({ tag: node.tagName.toLowerCase(), reason: "binding_broken" });
+        return;
+      }
+      const entity = indexMap.get(id);
+      if (!entity) {
+        issues.push({ id, reason: "no_canonical_entity" });
+        return;
+      }
+      reached.add(id);
+
+      if (entity.tag !== node.tagName.toLowerCase()) {
+        issues.push({ id, reason: "tag_mismatch" });
+      }
+
+      // parent / sibling order (root is exempt: registered with parentId=null)
+      if (!isRoot) {
+        const parentNode = node.parentNode;
+        const parentId =
+          parentNode && parentNode.nodeType === 1 ? weakNodeMap.get(parentNode) : null;
+        if (parentId !== entity.parentId) {
+          issues.push({ id, reason: "parent_mismatch" });
+        }
+        if (posInParent !== entity.idx) {
+          issues.push({ id, reason: "order_mismatch" });
+        }
+      }
+
+      // runtime state (truth)
+      if (entity.truth !== null) {
+        const cur = String(node.value ?? "");
+        if (cur !== entity.truth) {
+          issues.push({ id, reason: "value_mismatch" });
+        }
+      }
+
+      const kids = node.children;
+      for (let i = 0; i < kids.length; i++) walk(kids[i], false, i);
+    }
+
+    walk(root, true, 0);
+
+    // Removal Sweep : entities registered but not reached in the forward pass
+    for (const [id, entity] of indexMap) {
+      if (!reached.has(id)) {
+        issues.push({ id, reason: "removed", tag: entity.tag });
       }
     }
-    walk(root);
+
     return { valid: issues.length === 0, issues };
   }
 
@@ -179,12 +239,12 @@ function runScenarios() {
     const reg = createIdentityRegistry();
     reg.register(root, null, 0);
 
-    // attack: input#user 노드를 완전히 동일한 형태의 신규 노드로 교체
+    // attack: replace the input#user node with a new node of identical shape
     const oldUser = dom.window.document.getElementById("user");
     const newUser = dom.window.document.createElement("input");
     newUser.id = "user";
     newUser.type = "text";
-    newUser.value = "alice"; // 동일 value
+    newUser.value = "alice"; // identical value
     oldUser.parentNode.replaceChild(newUser, oldUser);
 
     const a = SnapshotBaseline.validate(snap, root);
@@ -199,7 +259,7 @@ function runScenarios() {
     dom.window.close();
   }
 
-  // T2. Genuine no-op (대조군)
+  // T2. Genuine no-op (control)
   {
     const dom = buildBase();
     const root = dom.window.document.getElementById("f");
@@ -207,7 +267,7 @@ function runScenarios() {
     const reg = createIdentityRegistry();
     reg.register(root, null, 0);
 
-    // 아무것도 변경하지 않음
+    // change nothing
     const a = SnapshotBaseline.validate(snap, root);
     const b = reg.validateAll(root);
 

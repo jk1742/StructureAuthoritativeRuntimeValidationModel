@@ -1,14 +1,24 @@
 /**
- * Case 3 - Performance measurement
+ * Case 3 - Performance measurement  (PROVENANCE ONLY - SUPERSEDED)
  *
- * 두 모델의 검증 비용을 노드 수별로 비교
- *  - Snapshot-diff : 매 검증마다 전체 트리 재직렬화 + Map diff
- *  - Identity      : root부터 walk하며 WeakNodeMap.get + value check
+ * Single-run timing script, superseded by the paired protocol. The source of truth
+ * for the paper's / dashboard's overhead (time) is browser/run_paired.mjs and
+ * browser/results/paired_case3_*.json. This is a JSDOM-only, non-paired measurement,
+ * so do not cite these numbers as headline performance. (see the artifact README)
  *
- * 측정 항목
- *  1) setup time      : 초기 등록(snapshot 생성 또는 entity register) 비용
- *  2) validate time   : 1회 전체 검증 비용
- *  3) memory hint     : snapshot은 trees per epoch 만큼 메모리 필요
+ * Compares the validation cost of the two models by node count:
+ *  - Snapshot-diff : re-serialize the whole tree + Map diff on every validation
+ *  - Identity      : walk from the root with WeakNodeMap.get + structure/value check + removal sweep
+ *
+ * The Identity validateAll used here is identical to the extended algorithm in
+ * case3_experiment.js (Forward Structure Validation + Removal Sweep; sibling position
+ * comes from the traversal index, O(1)). The timed path does not diverge from the
+ * experiment, and the whole pass stays O(N).
+ *
+ * Measured items
+ *  1) setup time      : initial registration cost (snapshot build or entity register)
+ *  2) validate time   : cost of one full validation
+ *  3) memory hint     : snapshot needs memory proportional to trees per epoch
  *
  * Node count : 10, 50, 100, 500, 1000, 2000
  */
@@ -39,7 +49,7 @@ function snapshot(root) {
   return out;
 }
 function snapshotDiff(prev, curr) {
-  // 가장 가벼운 diff: 같은 인덱스 위치에서 path/tag/value 비교
+  // lightest diff: compare path/tag/value at the same index position
   if (prev.length !== curr.length) return false;
   for (let i = 0; i < prev.length; i++) {
     const p = prev[i], c = curr[i];
@@ -56,37 +66,51 @@ function createIdentityRegistry() {
   const weakNodeMap = new WeakMap();
   let _seq = 0;
 
-  function register(node, parentId) {
+  function register(node, parentId, idx) {
     if (node.nodeType !== 1) return null;
     const id = `e-${(++_seq).toString(36)}`;
     const tag = node.tagName.toLowerCase();
     const truth = (tag === "input" || tag === "textarea") ? String(node.value ?? "") : null;
-    indexMap.set(id, { id, tag, truth, parentId });
+    indexMap.set(id, { id, tag, truth, parentId, idx });
     weakNodeMap.set(node, id);
     const kids = node.children;
     for (let i = 0; i < kids.length; i++) {
-      register(kids[i], id);
+      register(kids[i], id, i);
     }
     return id;
   }
 
+  // identical to case3_experiment.js: Forward Structure Validation + Removal Sweep
+  // (sibling position passed from the traversal index -> O(1)/node -> overall O(N))
   function validateAll(root) {
     let ok = true;
-    function walk(node) {
+    const reached = new Set();
+    function walk(node, isRoot, pos) {
       if (node.nodeType !== 1) return;
       const id = weakNodeMap.get(node);
       if (!id) { ok = false; return; }
       const entity = indexMap.get(id);
       if (!entity) { ok = false; return; }
-      if (entity.tag !== node.tagName.toLowerCase()) { ok = false; return; }
+      reached.add(id);
+      if (entity.tag !== node.tagName.toLowerCase()) ok = false;
+      if (!isRoot) {
+        const p = node.parentNode;
+        const pid = p && p.nodeType === 1 ? weakNodeMap.get(p) : null;
+        if (pid !== entity.parentId) ok = false;
+        if (pos !== entity.idx) ok = false;
+      }
       if (entity.truth !== null) {
         const cur = String(node.value ?? "");
-        if (cur !== entity.truth) { ok = false; return; }
+        if (cur !== entity.truth) ok = false;
       }
       const kids = node.children;
-      for (let i = 0; i < kids.length; i++) walk(kids[i]);
+      for (let i = 0; i < kids.length; i++) walk(kids[i], false, i);
     }
-    walk(root);
+    walk(root, true, 0);
+    // Removal Sweep
+    for (const [id] of indexMap) {
+      if (!reached.has(id)) ok = false;
+    }
     return ok;
   }
 
@@ -144,11 +168,11 @@ for (const N of NODE_COUNTS) {
   let regB;
   const setupB = measure(() => {
     regB = createIdentityRegistry();
-    regB.register(rootB, null);
+    regB.register(rootB, null, 0);
   });
-  // 최종 setup된 reg를 사용해 validate 측정
+  // measure validate using the finally set-up registry
   regB = createIdentityRegistry();
-  regB.register(rootB, null);
+  regB.register(rootB, null, 0);
   const validateB = measure(() => regB.validateAll(rootB));
   domB.window.close();
 

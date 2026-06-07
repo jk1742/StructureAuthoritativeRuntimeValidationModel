@@ -7,5 +7,5 @@ for (const kase of (cfg.cases || ["case1","case3","case4"])) {
   const r = runPaired({ case: kase, makeDoc, now: () => performance.now(), ...cfg });
   console.log(`\n=== JSDOM ${kase} (proposed/baseline) ===`);
   console.table(r.rows);
-  if (r.payload) { console.log("payload (deterministic):"); console.table(r.payload.map(p=>({nodes:p.nodes, identity_vs_keyed_pct:p.identity_vs_keyed_pct}))); }
+  if (r.payload) { console.log("payload (deterministic):"); console.table(r.payload); }
 }

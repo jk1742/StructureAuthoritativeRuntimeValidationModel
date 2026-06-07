@@ -13,7 +13,7 @@
  */
 
 import { JSDOM } from "jsdom";
-import { createRegistry } from "./model-form.mjs";
+import { createRegistry } from "./model-core.mjs";
 import fs from "fs";
 
 function buildDoc() {
@@ -22,7 +22,7 @@ function buildDoc() {
     `<form id="root">` +
     `<input id="username" type="text" />` +
     `<input id="agree" type="checkbox" />` +
-    `<input id="memo" type="text" />` +
+    `<textarea id="memo">hello world</textarea>` +
     `</form></body></html>`
   );
   return dom.window.document;
@@ -37,7 +37,7 @@ function canonicalTree() {
     id: "e-root", parentId: null, order: 0, type: "form", children: [
       { id: "e-username", parentId: "e-root", order: 0, type: "input", value: INIT_USERNAME, children: [] },
       { id: "e-agree",    parentId: "e-root", order: 1, type: "input", checked: INIT_AGREE,  children: [] },
-      { id: "e-memo",     parentId: "e-root", order: 2, type: "input", value: INIT_MEMO,     children: [] },
+      { id: "e-memo",     parentId: "e-root", order: 2, type: "textarea", value: INIT_MEMO,  children: [] },
     ],
   };
 }
@@ -127,9 +127,9 @@ runScenario("S2: checkbox.checked direct forgery",
   (d, U, A) => { A.checked = true; },
   [{ id: "agree", attack: "checkbox.checked=true" }]);
 
-runScenario("S3: value direct forgery",
+runScenario("S3: textarea.value direct forgery",
   (d, U, A, M) => { M.value = "INJECTED"; },
-  [{ id: "memo", attack: "input.value='INJECTED'" }]);
+  [{ id: "memo", attack: "textarea.value='INJECTED'" }]);
 
 runScenario("S4: evasion - property + meta tag co-forgery",
   (d, U, A, M, Meta) => {
@@ -141,7 +141,7 @@ runScenario("S4: evasion - property + meta tag co-forgery",
   [
     { id: "username", attack: "input.value + meta both" },
     { id: "agree",    attack: "checkbox.checked + meta both" },
-    { id: "memo",     attack: "input.value + meta both" },
+    { id: "memo",     attack: "textarea.value + meta both" },
   ]);
 
 console.log("\n=== Case 1: Runtime State Forgery Detection ===\n");

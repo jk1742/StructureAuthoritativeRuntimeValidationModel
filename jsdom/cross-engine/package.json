@@ -1,0 +1,16 @@
+{
+  "name": "structure-authoritative-validation-browser",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cross-environment reproduction (Chromium + Firefox + JSDOM) of the Structure-Authoritative Runtime Validation model: detection and per-case runtime overhead / payload, via a minimal reference implementation (Algorithm 1 + Section 4.1 registry).",
+  "type": "module",
+  "scripts": {
+    "setup": "playwright install chromium firefox",
+    "detect": "node run_browser_detection.mjs"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "jsdom": "29.1.1",
+    "playwright": "^1.60.0"
+  }
+}
