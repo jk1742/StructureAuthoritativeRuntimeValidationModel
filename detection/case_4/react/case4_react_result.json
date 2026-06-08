@@ -1,0 +1,106 @@
+{
+  "model": "B (real React keyed reconcile)",
+  "axis": "detection (authoritative for the paper)",
+  "timestamp": "2026-06-08T14:05:28.828Z",
+  "engines": {
+    "chromium": {
+      "engine": "chromium",
+      "R1_sameKey": {
+        "mode": "sameKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "user-typed-value",
+        "afterName": "user",
+        "domNodeReused": true,
+        "R1_preserve_satisfied": true,
+        "R2_discard_satisfied": false,
+        "R3_forgery_succeeded": false
+      },
+      "R2_sameKey": {
+        "mode": "sameKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "user-typed-value",
+        "afterName": "user",
+        "domNodeReused": true,
+        "R1_preserve_satisfied": true,
+        "R2_discard_satisfied": false,
+        "R3_forgery_succeeded": false
+      },
+      "R2_newKey_control": {
+        "mode": "newKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "",
+        "afterName": "user",
+        "domNodeReused": false,
+        "R1_preserve_satisfied": false,
+        "R2_discard_satisfied": true,
+        "R3_forgery_succeeded": false
+      },
+      "R3_attackerSameKey": {
+        "mode": "attackerSameKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "user-typed-value",
+        "afterName": "attacker-controlled",
+        "domNodeReused": true,
+        "R1_preserve_satisfied": true,
+        "R2_discard_satisfied": false,
+        "R3_forgery_succeeded": true
+      }
+    },
+    "firefox": {
+      "engine": "firefox",
+      "R1_sameKey": {
+        "mode": "sameKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "user-typed-value",
+        "afterName": "user",
+        "domNodeReused": true,
+        "R1_preserve_satisfied": true,
+        "R2_discard_satisfied": false,
+        "R3_forgery_succeeded": false
+      },
+      "R2_sameKey": {
+        "mode": "sameKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "user-typed-value",
+        "afterName": "user",
+        "domNodeReused": true,
+        "R1_preserve_satisfied": true,
+        "R2_discard_satisfied": false,
+        "R3_forgery_succeeded": false
+      },
+      "R2_newKey_control": {
+        "mode": "newKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "",
+        "afterName": "user",
+        "domNodeReused": false,
+        "R1_preserve_satisfied": false,
+        "R2_discard_satisfied": true,
+        "R3_forgery_succeeded": false
+      },
+      "R3_attackerSameKey": {
+        "mode": "attackerSameKey",
+        "reactVersion": "18.3.1",
+        "typedValue": "user-typed-value",
+        "afterValue": "user-typed-value",
+        "afterName": "attacker-controlled",
+        "domNodeReused": true,
+        "R1_preserve_satisfied": true,
+        "R2_discard_satisfied": false,
+        "R3_forgery_succeeded": true
+      }
+    }
+  },
+  "reading": {
+    "R1_R2": "같은 key 유지 → 노드 재사용 → 값 보존. R1(보존)은 맞히나 R2(폐기)는 틀린다. key 를 바꾸면(R2_newKey_control) 폐기를 맞히지만 그것은 개발자 key 규율 의존.",
+    "R3": "공격자가 같은 key 로 컴포넌트를 악성 정의로 교체 → 노드 재사용 → 비제어 입력값이 악성 정의로 잔존 = 위장+탈취 성공. key 는 client hint 라 lineage 단절을 강제 못 함.",
+    "claim": "권위 lineage(Model C, 별도 측정)는 규율 없이 새 id 발급/미발급 검증만으로 R2·R3 를 맞힌다."
+  }
+}

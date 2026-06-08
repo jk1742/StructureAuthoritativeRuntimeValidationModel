@@ -74,19 +74,19 @@ Headline outcomes:
 - **Case 1 (S4 evasion):** when the attacker forges both the property *and* the in-DOM
   `<meta>` the baseline relies on, the baseline is **bypassed**; the registry model
   (truth outside the DOM) still **detects** it. Validation time: proposed runs at about
-  0.69× (Chromium) / 0.50× (Firefox) of the baseline at 2,000 nodes, same O(N) order
+  roughly 0.7× (Chromium) / 0.45–0.5× (Firefox) of the baseline at 2,000 nodes, same O(N) order
   (proposed is faster because it avoids a per-field DOM read).
 - **Case 3 (T1 stale-subtree):** an identical-form replacement is **missed** by
   snapshot-diff but **detected** by identity continuity. Validation runs the **full
   Algorithm 1** (forward structure validation + removal sweep) and stays at **near
-  parity** with snapshot-diff in the same O(N) order — about 0.97–1.09× on Chromium and
-  0.95–1.05× on JSDOM (Firefox spans 0.67–1.07, but its sub-millisecond timings are
-  coarsely quantized). At 2,000 nodes Chromium is 0.53 ms (baseline) vs 0.58 ms
-  (proposed). The **detection result — not a single overhead figure — is the claim for
+  parity** with snapshot-diff in the same O(N) order on the production engines (Firefox's
+  sub-millisecond timings are coarsely quantized; JSDOM is not performance-representative
+  and varies more widely between runs). The **detection result — not a single overhead
+  figure — is the claim for
   this case.**
 - **Case 4 (R1/R2):** only identity reconciliation both **preserves** runtime state (R1)
   and **discards** stale state under a new authority-issued identity (R2). Reconstruction
-  cost stays within about 14% of keyed reconcile (median 0.86–1.10 across engines);
+  cost stays within roughly 15–20% of keyed reconcile on the production engines (JSDOM varies more widely);
   payloads differ by under 1%.
 - **Cross-engine:** S4 and T1 reproduce identically on Chromium 148 and Firefox 150
   (and JSDOM), with the control scenario reporting *not detected* on every engine.

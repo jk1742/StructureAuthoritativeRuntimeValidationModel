@@ -1,0 +1,130 @@
+{
+  "engine": "chromium",
+  "timestamp": "2026-06-08T13:38:43.321Z",
+  "rows": [
+    {
+      "scenario": "R1",
+      "model": "A innerHTML",
+      "expected": "value lost",
+      "preserved": false,
+      "value": "",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R1",
+      "model": "B keyed",
+      "expected": "preserved",
+      "preserved": true,
+      "value": "user-typed-value",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R1",
+      "model": "D server-id",
+      "expected": "preserved",
+      "preserved": true,
+      "value": "user-typed-value",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R1",
+      "model": "C identity",
+      "expected": "preserved",
+      "preserved": true,
+      "value": "user-typed-value",
+      "verdict": "RECONSTRUCTED",
+      "rejected": null
+    },
+    {
+      "scenario": "R2",
+      "model": "A innerHTML",
+      "expected": "discarded",
+      "discarded": true,
+      "value": "",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R2",
+      "model": "B keyed",
+      "expected": "false reuse",
+      "discarded": false,
+      "value": "user-typed-value",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R2",
+      "model": "D server-id",
+      "expected": "discarded",
+      "discarded": true,
+      "value": "",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R2",
+      "model": "C identity",
+      "expected": "discarded",
+      "discarded": true,
+      "value": "",
+      "verdict": "RECONSTRUCTION_REJECTED",
+      "rejected": null
+    },
+    {
+      "scenario": "R3",
+      "model": "A innerHTML",
+      "expected": "no impersonation / state also lost",
+      "forgerySucceeded": false,
+      "attackerPresent": true,
+      "attackerStoleValue": false,
+      "domSummary": "input[name=attacker-controlled]=\"\"",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R3",
+      "model": "B keyed",
+      "expected": "forged (same key)",
+      "forgerySucceeded": true,
+      "attackerPresent": true,
+      "attackerStoleValue": true,
+      "domSummary": "input[name=attacker-controlled]=\"user-typed-value\", input[name=email]=\"\", button[name=null]=\"\"",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R3",
+      "model": "D server-id",
+      "expected": "forged (client-reachable id)",
+      "forgerySucceeded": true,
+      "attackerPresent": true,
+      "attackerStoleValue": true,
+      "domSummary": "input[name=attacker-controlled]=\"user-typed-value\", input[name=email]=\"\", button[name=null]=\"\"",
+      "verdict": null,
+      "rejected": null
+    },
+    {
+      "scenario": "R3",
+      "model": "C identity",
+      "expected": "forgery blocked",
+      "forgerySucceeded": false,
+      "attackerPresent": false,
+      "attackerStoleValue": false,
+      "domSummary": "input[name=user]=\"user-typed-value\"",
+      "verdict": "RECONSTRUCTION_REJECTED",
+      "rejected": [
+        {
+          "position": 0,
+          "staleId": "auth:form-A:user#1",
+          "canonicalId": "auth:form-A:user#9999",
+          "reason": "forged-id-not-issued",
+          "action": "discarded"
+        }
+      ]
+    }
+  ]
+}

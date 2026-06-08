@@ -1,0 +1,19 @@
+{
+  "name": "case-4-reconstruction",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Case 4 — Component reconstruction consistency (R1/R2/R3 x A/B/C/D) on real Chromium. Matrix axis (minimal A/B/C/D logic) + detection axis (real React Model B).",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "install:browsers": "playwright install chromium",
+    "install:browsers:cross": "playwright install chromium firefox",
+    "matrix": "node chromium/run-matrix.mjs",
+    "react": "node react/run.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
