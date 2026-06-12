@@ -1,0 +1,94 @@
+{
+  "engine": "chromium",
+  "engineVersion": "148.0.7778.96",
+  "case": "case3",
+  "paired": "proposed/baseline",
+  "note": "both baseline (snapshot-diff) and proposed (identity walk) traverse the full tree per call; ratio ~1 (near parity) is a fair result, not an artifact. O(N).",
+  "rows": [
+    {
+      "nodes": 10,
+      "ratio_median": 0.9499,
+      "ratio_iqr": [
+        0.9435,
+        0.9529
+      ],
+      "baseline_ms_median": 0.0041,
+      "proposed_ms_median": 0.0039
+    },
+    {
+      "nodes": 50,
+      "ratio_median": 0.9498,
+      "ratio_iqr": [
+        0.9471,
+        0.9551
+      ],
+      "baseline_ms_median": 0.0176,
+      "proposed_ms_median": 0.0168
+    },
+    {
+      "nodes": 100,
+      "ratio_median": 0.9664,
+      "ratio_iqr": [
+        0.9629,
+        0.9724
+      ],
+      "baseline_ms_median": 0.0344,
+      "proposed_ms_median": 0.0332
+    },
+    {
+      "nodes": 200,
+      "ratio_median": 0.9649,
+      "ratio_iqr": [
+        0.9599,
+        0.9664
+      ],
+      "baseline_ms_median": 0.0705,
+      "proposed_ms_median": 0.0677
+    },
+    {
+      "nodes": 500,
+      "ratio_median": 0.9804,
+      "ratio_iqr": [
+        0.9768,
+        0.9826
+      ],
+      "baseline_ms_median": 0.1738,
+      "proposed_ms_median": 0.1707
+    },
+    {
+      "nodes": 1000,
+      "ratio_median": 0.9954,
+      "ratio_iqr": [
+        0.9884,
+        1
+      ],
+      "baseline_ms_median": 0.3729,
+      "proposed_ms_median": 0.3676
+    },
+    {
+      "nodes": 2000,
+      "ratio_median": 1.0646,
+      "ratio_iqr": [
+        1.0627,
+        1.0702
+      ],
+      "baseline_ms_median": 0.7619,
+      "proposed_ms_median": 0.8155
+    }
+  ],
+  "config": {
+    "nodeCounts": [
+      10,
+      50,
+      100,
+      200,
+      500,
+      1000,
+      2000
+    ],
+    "repeat": 30,
+    "warmup": 3,
+    "runs": 10,
+    "targetMs": 5
+  }
+}

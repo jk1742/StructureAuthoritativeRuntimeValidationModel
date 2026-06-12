@@ -1,0 +1,8 @@
+<!doctype html><meta charset="utf-8"><title>Case 3 paired benchmark</title>
+<body><div id="stage"></div>
+<script type="module">
+  import { runCase3Paired } from "./case3_bench_core.mjs";
+  window.__runCase3Paired = async (opts = {}) =>
+    runCase3Paired({ makeDoc: () => document.implementation.createHTMLDocument("p"), now: () => performance.now(), ...opts });
+  window.__ready = true;
+</script></body>

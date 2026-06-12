@@ -5,13 +5,14 @@
   "type": "module",
   "description": "Case 3 (snapshot-diff vs identity continuity) — Chromium primary, Firefox cross-check, JSDOM reference",
   "scripts": {
-    "setup": "npm install playwright jsdom && npx playwright install chromium firefox",
+    "setup": "npm playwright install chromium firefox",
+    "overhead": "node case3_paired_run.mjs",
     "experiment": "node case3_experiment.mjs",
     "experiment:jsdom": "node case3_experiment_jsdom.mjs",
     "figures": "node generate_case3_figures.mjs"
   },
   "devDependencies": {
-    "jsdom": "29.1.1",
+    "jsdom": "^29.1.1",
     "playwright": "^1.60.0"
   }
 }

@@ -1,32 +1,39 @@
 /* =====================================================================
- * run.mjs — Case 3 cross-engine 러너 (Chromium 대표 / Firefox 교차 / JSDOM 참조)
+ * case3_experiment.mjs — Case 3 detection 러너 (Chromium 대표 / Firefox 교차)
  * ---------------------------------------------------------------------
- * 엔진 정책: Chromium = headline(대표), Firefox = 교차검증, JSDOM = 비대표 참조.
- * 기존 jsdom/cross-engine/run_browser_detection.mjs 패턴을 그대로 따른다:
- * 폴더를 loopback HTTP로 서빙 → harness.html을 각 엔진에서 열어 __runCase3() 호출.
+ * 엔진 정책: Chromium = headline(대표), Firefox = 교차검증. (양엔진)
+ *   JSDOM 참조는 비대표라 본 러너에서 분리 — 필요 시 case3_experiment_jsdom.mjs 로
+ *   단독 실행(non-cited reference). 본문은 양엔진(Chromium, Firefox)만 인용한다.
+ * 폴더를 loopback HTTP로 서빙 → harness.html 을 각 엔진에서 열어 __runCase3() 호출.
  *
- * 로컬 실행 (작성자 머신):
- *   npm install playwright jsdom
- *   npx playwright install chromium firefox
- *   node run.mjs
+ * 로컬 실행:
+ *   npm install playwright ;npx playwright install chromium firefox
+ *   node case3_experiment.mjs
  * 출력: results/case3_<engine>.json + 합산 검증 테이블.
  * ===================================================================== */
 import { chromium, firefox } from "playwright";
 import http from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { JSDOM } from "jsdom";
-import { runCase3 } from "./scenarios-case3.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(__dirname, "results");
+// model-core 2종은 case_3 밖(repo 루트)에 있어 정적 서버 루트 밖 → 라우트로 서빙.
+// scenarios-case3.js 의 import 경로(../../model-core-report.mjs)는 Node 에선 맞고,
+// 브라우저에선 /model-core-report.mjs 로 클램프되므로 그 라우트를 제공한다(import 무수정).
+const findFirst = (c) => { for (const p of c) if (existsSync(p)) return path.resolve(p); return null; };
+const MODEL_CORE = findFirst([path.join(__dirname, "..", "model-core.mjs"), path.join(__dirname, "..", "..", "model-core.mjs")]);
+const MODEL_REPORT = findFirst([path.join(__dirname, "..", "model-core-report.mjs"), path.join(__dirname, "..", "..", "model-core-report.mjs")]);
 
 function startServer(root) {
   const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".json": "application/json" };
   const s = http.createServer(async (req, res) => {
     try {
       const u = decodeURIComponent(req.url.split("?")[0]);
+      if (u === "/model-core.mjs" && MODEL_CORE) { res.setHeader("Content-Type", "text/javascript"); return res.end(await readFile(MODEL_CORE)); }
+      if (u === "/model-core-report.mjs" && MODEL_REPORT) { res.setHeader("Content-Type", "text/javascript"); return res.end(await readFile(MODEL_REPORT)); }
       const fp = path.join(root, u === "/" ? "/harness.html" : u);
       if (!fp.startsWith(root)) { res.statusCode = 403; return res.end("no"); }
       const b = await readFile(fp);
@@ -48,7 +55,6 @@ async function onBrowser(name, launcher, baseUrl) {
   return { engine: name, engineVersion: ver, rows };
 }
 
-// 한 엔진의 모든 행이 expected와 일치하는지
 function summarize(rows) {
   return rows.every(
     (r) => r.snapshot.detected === r.snapshot.expected && r.identity.detected === r.identity.expected
@@ -69,20 +75,10 @@ async function main() {
   try { results.push(await onBrowser("firefox", firefox, baseUrl)); console.log("[firefox] done"); }
   catch (e) { console.error(`[firefox] FAILED: ${e.message}`); }
 
-  // 3) JSDOM — 비대표 참조(엔진 비의존 ground truth)
-  try {
-    const doc = new JSDOM("<!doctype html><html><head></head><body></body></html>").window.document;
-    results.push({ engine: "jsdom", engineVersion: process.version, rows: runCase3(doc) });
-    console.log("[jsdom] done");
-  } catch (e) { console.error(`[jsdom] FAILED: ${e.message}`); }
-
   for (const r of results) {
     await writeFile(path.join(OUT, `case3_${r.engine}.json`), JSON.stringify(r, null, 2));
   }
 
-  // 사람이 읽는 표: 시나리오 설명 + 모델명 + 기대 + 검증.
-  // 세 엔진이 항상 동일하므로 엔진별 열 대신 한 줄로 합치고,
-  // 불일치할 때만 경고한다(불일치 자체가 중요한 발견이므로 숨기지 않음).
   const DESC = {
     T1: "identical-form replacement",
     T2: "genuine no-op (control)",
@@ -109,7 +105,7 @@ async function main() {
   console.log("\n=== Case 3 detection (snapshot-diff vs identity continuity) ===");
   console.log(enginesAgree
     ? `  confirmed identical on ${verline}`
-    : `  WARNING: engines disagree — see results/*.json`);
+    : `  WARNING: engines disagree — see result/*.json`);
 
   console.table(base.map((r) => {
     const isAttack = r.snapshot.expected || r.identity.expected;

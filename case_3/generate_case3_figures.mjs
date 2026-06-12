@@ -159,7 +159,7 @@ function makeFig(scenarios) {
   svg += `<text x="${P.left + 380}" y="${legY + 2}" class="legend">valid (control)</text>\n`;
 
   svg += svgFooter;
-  writeFileSync(path.join(OUT_DIR, "case3_fig1_detection.svg"), svg);
+  writeFileSync(path.join(RES, "case3_fig1_detection.svg"), svg);
 }
 
 // -------- 실행 --------
@@ -168,5 +168,5 @@ const engines = assertCrossEngineAgreement(found);
 const scenarios = scenariosFromResults(found.chromium.rows);
 makeFig(scenarios);
 console.log("Generated:");
-console.log("  " + path.join(OUT_DIR, "case3_fig1_detection.svg"));
+console.log("  " + path.join(RES, "case3_fig1_detection.svg"));
 console.log("  (states from results/; confirmed identical on: " + engines.join(", ") + ")");
