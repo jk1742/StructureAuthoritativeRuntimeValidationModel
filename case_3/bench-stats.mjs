@@ -1,6 +1,5 @@
 // bench-stats.mjs
 // Shared paired-ratio measurement + multi-run aggregation.
-// (Case 1 추출본: browser/bench-stats.mjs 와 동일 — verbatim.)
 export const DEFAULT_REPEAT = 30; // paired ratios per run
 export const DEFAULT_WARMUP = 3;
 export const DEFAULT_RUNS = 10;   // independent rounds (run-to-run variance)

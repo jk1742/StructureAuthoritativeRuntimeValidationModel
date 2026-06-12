@@ -1,20 +1,4 @@
-/* =====================================================================
- * react/run-overhead-react.mjs — React 18.3.1 재구성 시간 참조선 측정 (production)
- * ---------------------------------------------------------------------
- * ※ 작성자 로컬 실행 (Playwright 브라우저 바이너리 필요).
- *   npm run overhead:react
- *
- * A/B/C/D 메인 드라이버(chromium/run-overhead.mjs)와 '같은 프로토콜'로 React 만
- * 따로 측정 → react/case4_react_overhead_result.json. 그래프 생성기가 병합해
- * 'framework reference' 참조선으로 그린다.
- *
- * 분리 이유: React 는 #root + production UMD 전역이 필요해 A/B/C/D 의 bench.html
- * (모듈 import)과 페이지 구성이 다르다. 기존 react/run.mjs 의 addScriptTag 주입
- * 방식을 그대로 따른다(파일 URL/상대경로 문제 회피).
- *
- * 정직성: 측정 1회 = flushSync(setState) commit 동기 구간(코어 reconcile 만이 아닌
- * React 전체). production UMD. 같은 N·재사용 경로·batch K·RUNS 중앙값.
- * ===================================================================== */
+/* react/run-overhead-react.mjs — React 18.3.1 */
 import { chromium } from "playwright";
 import { readFile } from "fs/promises";
 import { writeFileSync } from "fs";
@@ -23,7 +7,7 @@ import path from "path";
 import { NODE_COUNTS, reactPropsN } from "../bench/builders.mjs";
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const RUNS = 31;          // 메인 드라이버와 일치(작성자 확정값에 맞출 것)
+const RUNS = 31;
 const WARMUP = 3;
 const TARGET_MS = 120;
 const MIN_K = 5;
@@ -68,13 +52,12 @@ const browser = await chromium.launch();
 const page = await browser.newPage();
 page.on("pageerror", (e) => console.log("[pageerror]", e.message));
 await page.setContent('<!doctype html><html><body><div id="root"></div></body></html>');
-// production UMD + overhead 하니스 주입 (file:// 회피)
 await page.addScriptTag({ path: path.join(dir, "..", "..", "vendor", "react.production.min.js") });
 await page.addScriptTag({ path: path.join(dir, "..", "..", "vendor", "react-dom.production.min.js") });
 await page.addScriptTag({ path: path.join(dir, "case4_react_overhead.js") });
 await page.waitForFunction("window.__reactReady === true", { timeout: 8000 }).catch(async () => {
   const err = await page.evaluate(() => window.__reactError || "unknown");
-  throw new Error("React harness 준비 실패: " + err);
+  throw new Error("React harness ready fail: " + err);
 });
 
 const time = [];
@@ -85,7 +68,6 @@ for (const n of NODE_COUNTS) {
 }
 await browser.close();
 
-// React payload(props 데이터, 결정적)
 const payload = NODE_COUNTS.map((n) => ({ nodes: n, React_props: B(JSON.stringify(reactPropsN(n))) }));
 const result = {
   axis: "overhead-react-reference",

@@ -1,16 +1,6 @@
-/* =====================================================================
- * case3_experiment.mjs — Case 3 detection 러너 (Chromium 대표 / Firefox 교차)
- * ---------------------------------------------------------------------
- * 엔진 정책: Chromium = headline(대표), Firefox = 교차검증. (양엔진)
- *   JSDOM 참조는 비대표라 본 러너에서 분리 — 필요 시 case3_experiment_jsdom.mjs 로
- *   단독 실행(non-cited reference). 본문은 양엔진(Chromium, Firefox)만 인용한다.
- * 폴더를 loopback HTTP로 서빙 → harness.html 을 각 엔진에서 열어 __runCase3() 호출.
- *
- * 로컬 실행:
- *   npm install playwright ;npx playwright install chromium firefox
- *   node case3_experiment.mjs
- * 출력: results/case3_<engine>.json + 합산 검증 테이블.
- * ===================================================================== */
+/* 
+ * case3_experiment.mjs — Case 3 detection (Chromium / Firefox)
+ */
 import { chromium, firefox } from "playwright";
 import http from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
@@ -20,9 +10,6 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(__dirname, "results");
-// model-core 2종은 case_3 밖(repo 루트)에 있어 정적 서버 루트 밖 → 라우트로 서빙.
-// scenarios-case3.js 의 import 경로(../../model-core-report.mjs)는 Node 에선 맞고,
-// 브라우저에선 /model-core-report.mjs 로 클램프되므로 그 라우트를 제공한다(import 무수정).
 const findFirst = (c) => { for (const p of c) if (existsSync(p)) return path.resolve(p); return null; };
 const MODEL_CORE = findFirst([path.join(__dirname, "..", "model-core.mjs"), path.join(__dirname, "..", "..", "model-core.mjs")]);
 const MODEL_REPORT = findFirst([path.join(__dirname, "..", "model-core-report.mjs"), path.join(__dirname, "..", "..", "model-core-report.mjs")]);
@@ -67,11 +54,11 @@ async function main() {
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
   const results = [];
 
-  // 1) Chromium — 대표(headline)
+  // 1) Chromium
   try { results.push(await onBrowser("chromium", chromium, baseUrl)); console.log("[chromium] done"); }
   catch (e) { console.error(`[chromium] FAILED: ${e.message}`); }
 
-  // 2) Firefox — 교차검증
+  // 2) Firefox
   try { results.push(await onBrowser("firefox", firefox, baseUrl)); console.log("[firefox] done"); }
   catch (e) { console.error(`[firefox] FAILED: ${e.message}`); }
 

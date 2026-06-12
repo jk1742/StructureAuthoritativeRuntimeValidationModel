@@ -58,10 +58,10 @@ async function main() {
   }
   for (const r of results) await writeFile(path.join(OUT, `case1_paired_${r.engine}.json`), JSON.stringify(r, null, 2));
 
-  console.log("\n=== case1 timed: proposed/baseline (ratio>=1 by design; 본문 비인용) ===");
+  console.log("\n=== case1 timed: proposed/baseline (ratio>=1 by design;) ===");
   const nodes = results[0]?.rows.map((x) => x.nodes) ?? [];
   console.table(nodes.map((nd) => { const row = { nodes: nd }; for (const r of results) { const x = r.rows.find((y) => y.nodes === nd); row[r.engine] = x ? `${x.ratio_median} [${x.ratio_iqr[0]}, ${x.ratio_iqr[1]}]` : "n/a"; } return row; }));
-  if (results[0]?.payload) { console.log("payload (deterministic — 본문 0.52x):"); console.table(results[0].payload.map((p) => ({ nodes: p.nodes, ratio: p.proposed_vs_baseline_ratio }))); }
+  if (results[0]?.payload) { console.log("payload (deterministic — 0.52x):"); console.table(results[0].payload.map((p) => ({ nodes: p.nodes, ratio: p.proposed_vs_baseline_ratio }))); }
   server.close();
 }
 main();

@@ -1,6 +1,4 @@
-/* run-jsdom.mjs — 브라우저 없이 JSDOM으로 로직 검증/참조 산출.
- *   npm install jsdom && node run-jsdom.mjs
- * expected와 불일치 시 비정상 종료. */
+/* run-jsdom.mjs — test case */
 import { JSDOM } from "jsdom";
 import { runCase3 } from "./scenarios-case3.js";
 

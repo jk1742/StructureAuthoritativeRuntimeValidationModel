@@ -52,8 +52,8 @@
     }
   },
   "reading": {
-    "R1_R2": "같은 key 유지 → 노드 재사용 → 값 보존. R1(보존)은 맞히나 R2(폐기)는 틀린다. key 를 바꾸면(R2_newKey_control) 폐기를 맞히지만 그것은 개발자 key 규율 의존.",
-    "R3": "공격자가 같은 key 로 컴포넌트를 악성 정의로 교체 → 노드 재사용 → 비제어 입력값이 악성 정의로 잔존 = 위장+탈취 성공. key 는 client hint 라 lineage 단절을 강제 못 함.",
-    "claim": "권위 lineage(Model C, 별도 측정)는 규율 없이 새 id 발급/미발급 검증만으로 R2·R3 를 맞힌다."
+    "R1_R2": "Same key kept -> node reused -> value preserved. Correct on R1 (preserve) but wrong on R2 (discard). Changing the key (R2_newKey_control) gets the discard right, but that relies on developer key discipline.",
+    "R3": "Attacker replaces the component with a malicious definition under the same key -> node reused -> uncontrolled input value persists into the malicious definition = spoofing + hijack succeeds. A key is a client hint and cannot force a lineage break.",
+    "claim": "An authority lineage (Model C, measured separately) gets R2 and R3 right with no discipline required, by issuing a new id / verifying non-issuance alone."
   }
 }

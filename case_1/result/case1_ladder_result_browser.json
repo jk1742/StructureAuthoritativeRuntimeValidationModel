@@ -1,7 +1,7 @@
 {
   "case": "case1-ladder",
-  "bench": "http://127.0.0.1:56756/bench.html",
-  "timestamp": "2026-06-11T13:32:01.067Z",
+  "bench": "http://127.0.0.1:49847/bench.html",
+  "timestamp": "2026-06-12T09:10:02.831Z",
   "engines": {
     "chromium": [
       {
@@ -24,6 +24,12 @@
       },
       {
         "level": "S4",
+        "baseline": "Bypassed",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
+        "level": "S5_synthetic",
         "baseline": "Bypassed",
         "proposed": "Detected",
         "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
@@ -75,6 +81,12 @@
         "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
       },
       {
+        "level": "S5_synthetic",
+        "baseline": "Bypassed",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
         "level": "L2",
         "baseline": "—",
         "proposed": "Detected",
@@ -93,6 +105,72 @@
         "proposed": "Bypassed",
         "reason": null,
         "scope": "inside (excluded by threat model)"
+      }
+    ]
+  },
+  "detection6": {
+    "chromium": [
+      {
+        "instance": "S1",
+        "baseline": "Detected",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S2",
+        "baseline": "Detected",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S3",
+        "baseline": "Detected",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S4_username",
+        "baseline": "Bypassed",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S4_agree",
+        "baseline": "Bypassed",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S4_memo",
+        "baseline": "Bypassed",
+        "proposed": "Detected"
+      }
+    ],
+    "firefox": [
+      {
+        "instance": "S1",
+        "baseline": "Detected",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S2",
+        "baseline": "Detected",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S3",
+        "baseline": "Detected",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S4_username",
+        "baseline": "Bypassed",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S4_agree",
+        "baseline": "Bypassed",
+        "proposed": "Detected"
+      },
+      {
+        "instance": "S4_memo",
+        "baseline": "Bypassed",
+        "proposed": "Detected"
       }
     ]
   }

@@ -1,9 +1,5 @@
 // case3_paired_run.mjs
-// Case 3 overhead (timed near-parity) — Chromium + Firefox (Playwright). JSDOM 미사용.
-//   browser/run_paired.mjs 의 case3 부분만 추출. model-core 불필요(인라인 registry).
-//   실행(case_3/overhead/ 에서): node case3_paired_run.mjs
-//   산출: ../results/paired_case3_<engine>.json
-//   게이트: ratio ~1 (Chromium ~0.97-1.15, Firefox ~1.00 timer-quantized)
+// Case 3 overhead (timed near-parity) — Chromium + Firefox (Playwright). JSDOM X.
 import { chromium, firefox } from "playwright";
 import http from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
@@ -48,7 +44,7 @@ async function main() {
   }
   for (const r of results) await writeFile(path.join(OUT, `paired_case3_${r.engine}.json`), JSON.stringify(r, null, 2));
 
-  console.log("\n=== case3 timed: proposed/baseline ratio (near parity 기대) ===");
+  console.log("\n=== case3 timed: proposed/baseline ratio (near parity) ===");
   const nodes = results[0]?.rows.map((x) => x.nodes) ?? [];
   console.table(nodes.map((nd) => { const row = { nodes: nd }; for (const r of results) { const x = r.rows.find((y) => y.nodes === nd); row[r.engine] = x ? `${x.ratio_median} [${x.ratio_iqr[0]}, ${x.ratio_iqr[1]}]` : "n/a"; } return row; }));
   server.close();

@@ -1,24 +1,6 @@
-/* =====================================================================
- * chromium/run-matrix.mjs — Case 4 매트릭스 드라이버 (공통 엔진: 실 Chromium)
- * ---------------------------------------------------------------------
- * ※ 작성자 로컬에서 실행 (HANDOFF §8: Playwright 브라우저 바이너리는
- *    샌드박스에서 다운로드 불가).
- *
- *   npm install playwright
- *   npx playwright install chromium
- *   node chromium/run-matrix.mjs
- *
- * 출력: chromium/case4_matrix_result.json (측정값). placeholder 없음.
- *
- * 측정 범위: 모델 A/B/C/D × 시나리오 R1/R2/R3.
- *   - 공통 엔진 = 실 Chromium DOM (JSDOM 사용 안 함).
- *   - src/*.mjs 를 단일 출처로 페이지에 import (측정==구현 코드 일치, HANDOFF §8).
- *   - 'expected'는 HANDOFF §2 의 '가설' 라벨일 뿐, 실제 outcome 은 실행 산출.
- *   - Model B 는 최소 구현 keyed(로직 확인). 논문 Model B 탐지 수치는
- *     react/ 의 실 React 측정이 권위 (HANDOFF §5).
- *
- * 의존성 없는 임시 정적 서버를 띄워 http 로 로드한다(파일:// 모듈 CORS 회피).
- * ===================================================================== */
+/* 
+ * chromium/run-matrix.mjs — Case 4 matrix driver
+ */
 import { chromium, firefox } from "playwright";
 import { createServer } from "http";
 import { readFile } from "fs/promises";
@@ -26,7 +8,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const root = path.join(dir, ".."); // 패키지 루트 (src/ 도 서빙)
+const root = path.join(dir, "..");
 const TYPED = "user-typed-value";
 
 const MIME = { ".html": "text/html", ".mjs": "text/javascript", ".js": "text/javascript", ".json": "application/json" };
@@ -54,7 +36,7 @@ const CELLS = [
   ["R2", "A", "discarded"], ["R2", "B", "false reuse"], ["R2", "D", "discarded"], ["R2", "C", "discarded"],
   ["R3", "A", "no impersonation / state also lost"], ["R3", "B", "forged (same key)"],
   ["R3", "D", "forged (client-reachable id)"], ["R3", "C", "forged (replayed issued id)"],
-  ["R3_FAB", "C", "fabricated id rejected"],   // C 고유: B/D 는 대장 없어 거부 불가(구조적)
+  ["R3_FAB", "C", "fabricated id rejected"],
 ];
 const MODEL_LABEL = { A: "A innerHTML", B: "B keyed", C: "C identity", D: "D server-id" };
 
@@ -77,7 +59,7 @@ async function runEngine(launcher, engineName) {
   const rows = [];
   for (const [scenario, model, expected] of CELLS) {
     await page.evaluate(([m, s]) => window.c4_setup(m, s), [model, scenario]);
-    await page.fill('input[name="user"]', TYPED); // 실 입력 이벤트
+    await page.fill('input[name="user"]', TYPED);
     const measured = await page.evaluate(([m, s]) => window.c4_apply(m, s), [model, scenario]);
     rows.push({ scenario, model: MODEL_LABEL[model], expected, ...measured });
   }
@@ -86,15 +68,14 @@ async function runEngine(launcher, engineName) {
 }
 
 const engines = {};
-engines.chromium = await runEngine(chromium, "chromium"); // 주 엔진
+engines.chromium = await runEngine(chromium, "chromium");
 try {
-  engines.firefox = await runEngine(firefox, "firefox");  // 탐지 교차(결정적 로직 → 동일 기대)
+  engines.firefox = await runEngine(firefox, "firefox");
 } catch (e) {
   engines.firefox = { skipped: true, reason: String((e && e.message) || e) };
 }
 server.close();
 
-// 콘솔 표는 주 엔진(Chromium) 기준
 const rows = engines.chromium;
 const table = rows.map((r) => ({
   Scenario: r.scenario, Model: r.model,
@@ -105,7 +86,6 @@ console.table(table);
 console.log("\nR3 DOM after reconstruction (Chromium):");
 rows.filter((r) => r.scenario === "R3").forEach((r) => console.log(`  ${r.model}: ${r.domSummary}`));
 
-// 엔진 간 outcome 일치 점검(탐지 동일성 확인)
 if (Array.isArray(engines.firefox)) {
   const mism = engines.chromium.filter((c, i) => {
     const f = engines.firefox[i];

@@ -1,11 +1,6 @@
 /**
  * generate_case3_figures.mjs — Case 3 figure generation (ESM, data-driven)
  * - case3_fig1_detection.svg : T1~T4 detection matrix
- *
- * 재구성 원칙: 기존 generate_case3_figures.js의 "그림 모양"(svgHeader/스타일/
- * 셀·범례 레이아웃·색·문구)을 그대로 보존한다. 바뀐 것은 입력 경로뿐 —
- * 셀 상태를 하드코딩하지 않고 results/case3_<engine>.json(run.mjs 산출)에서 읽는다.
- * 그리기 전 3엔진 결과가 행별로 일치하는지 검증하고, 불일치 시 중단한다.
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
@@ -15,10 +10,9 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = __dirname;
 const RES = path.join(__dirname, "results");
-const ENGINES = ["chromium", "firefox", "jsdom"]; // chromium = headline(대표)
+const ENGINES = ["chromium", "firefox", "jsdom"]; 
 if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
 
-// -------- 입력: results/에서 읽어 시나리오 행 파생 (하드코딩 제거) --------
 function loadResults() {
   const found = {};
   for (const e of ENGINES) {
@@ -26,7 +20,7 @@ function loadResults() {
     if (existsSync(fp)) found[e] = JSON.parse(readFileSync(fp, "utf8"));
   }
   if (!found.chromium) {
-    throw new Error("results/case3_chromium.json 이 없습니다. 먼저 `node run.mjs` 실행.");
+    throw new Error("results/case3_chromium.json missing. `node run.mjs` run first.");
   }
   return found;
 }
@@ -37,16 +31,15 @@ function assertCrossEngineAgreement(found) {
   for (const e of engines) {
     for (const r of base) {
       const o = found[e].rows.find((x) => x.id === r.id);
-      if (!o) throw new Error(`${e}: 시나리오 ${r.id} 누락`);
+      if (!o) throw new Error(`${e}: scenarios ${r.id} missing`);
       if (o.snapshot.detected !== r.snapshot.detected || o.identity.detected !== r.identity.detected) {
-        throw new Error(`엔진 불일치 (${r.id}) — 그림 생성 중단.`);
+        throw new Error(`(${r.id}) — stop`);
       }
     }
   }
   return engines;
 }
 
-// 표시용 짧은 서술(원본 desc와 동일). 상태는 데이터에서 파생.
 const DESC = {
   T1: "Identical replacement",
   T2: "Genuine no-op (control)",
@@ -54,13 +47,11 @@ const DESC = {
   T4: "Structural insertion",
 };
 
-// 데이터(detected/expected) → 원본 상태 어휘(MISSED/Detected/VALID)
 function stateFrom(cell, isAttack) {
   if (cell.detected) return "Detected";
   return isAttack ? "MISSED" : "VALID";
 }
 
-// results 행 → 원본 scenarios 배열과 동일한 형태 { id, desc, snap, ident }
 function scenariosFromResults(rows) {
   return rows.map((r) => {
     const isAttack = r.snapshot.expected || r.identity.expected;
@@ -73,7 +64,6 @@ function scenariosFromResults(rows) {
   });
 }
 
-// ===================== 이하 SVG 생성: 원본과 동일 보존 =====================
 function svgHeader(w, h, title, desc) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" font-family="Helvetica, Arial, sans-serif" role="img">
@@ -162,7 +152,6 @@ function makeFig(scenarios) {
   writeFileSync(path.join(RES, "case3_fig1_detection.svg"), svg);
 }
 
-// -------- 실행 --------
 const found = loadResults();
 const engines = assertCrossEngineAgreement(found);
 const scenarios = scenariosFromResults(found.chromium.rows);

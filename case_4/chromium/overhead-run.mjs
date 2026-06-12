@@ -1,15 +1,4 @@
-/* =====================================================================
- * chromium/run-overhead.mjs — Case 4 overhead 측정 드라이버 (실 Chromium)
- * ---------------------------------------------------------------------
- * ※ 작성자 로컬 실행 (Playwright 브라우저 바이너리는 샌드박스 다운로드 불가).
- *   npm install && npm run install:browsers && npm run overhead
- *
- * 출력: chromium/case4_overhead_result.json
- *   - time: 모델 A/B/C/D × 노드수, 재사용 경로, in-page performance.now()
- *           batch(K 자동보정) + 워밍업 3 후 15회, 중앙값 + 최소~최대 보고.
- *   - payload: bench/payload.mjs 의 실제 전송 바이트(결정적, Node 산출)를 병합.
- *   - placeholder 없음 — 전부 실측.
- * ===================================================================== */
+/* chromium/run-overhead.mjs — Case 4 overhead */
 import { chromium } from "playwright";
 import { createServer } from "http";
 import { readFile } from "fs/promises";
@@ -22,10 +11,10 @@ import { payloadSizes } from "../bench/payload.mjs";
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dir, "..");
 const MODELS = ["A", "B", "C", "D"];
-const RUNS = 31;          // 중앙값 안정화(홀수)
-const WARMUP = 3;         // JIT 안정화
-const TARGET_MS = 120;    // batch 구간을 타이머 눈금·지터보다 충분히 크게
-const MIN_K = 5;          // 큰 N(1회가 길어도)에서도 최소 batch 횟수 강제
+const RUNS = 31;          
+const WARMUP = 3;         
+const TARGET_MS = 120;    
+const MIN_K = 5;          
 const MIME = { ".html": "text/html", ".mjs": "text/javascript", ".js": "text/javascript", ".json": "application/json" };
 
 function startServer() {
@@ -45,12 +34,12 @@ function startServer() {
   });
 }
 
-function stats0(a) {                 // 순수 중앙값(기존 median 대체, MAD용 재사용)
+function stats0(a) {                 
   const s = [...a].sort((x, y) => x - y);
   const m = s.length >> 1;
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
-function stats(a) {                  // 중앙값 + Q1/Q3/IQR + min/max + MAD + CV
+function stats(a) {                  // median_ms + Q1/Q3/IQR + min/max + MAD + CV
   const s = [...a].sort((x, y) => x - y);
   const q = (p) => { const i=(s.length-1)*p, lo=Math.floor(i), hi=Math.ceil(i);
                      return lo===hi ? s[lo] : s[lo]+(s[hi]-s[lo])*(i-lo); };
@@ -78,7 +67,7 @@ async function calibrateK(page, model, n) {
 async function measureCell(page, model, n) {
   const K = await calibrateK(page, model, n);
   await page.evaluate(([m, nn]) => window.c4setup(m, nn), [model, n]);
-  for (let w = 0; w < WARMUP; w++) await page.evaluate((k) => window.c4timeK(k), K); // 워밍업 폐기
+  for (let w = 0; w < WARMUP; w++) await page.evaluate((k) => window.c4timeK(k), K);
   const perIter = [];
   for (let r = 0; r < RUNS; r++) {
     const ms = await page.evaluate((k) => window.c4timeK(k), K);
@@ -86,7 +75,7 @@ async function measureCell(page, model, n) {
   }
   return {
     model, nodes: n, K, runs: RUNS,
-    ...stats(perIter),     // median_ms·q1_ms·q3_ms·iqr_ms·min_ms·max_ms·mad_ms·cv 가 평평히 들어감
+    ...stats(perIter),     // median_ms·q1_ms·q3_ms·iqr_ms·min_ms·max_ms·mad_ms·cv
     samples_ms: perIter,
   };
 }
@@ -111,7 +100,7 @@ for (const model of MODELS) {
 await browser.close();
 server.close();
 
-const payload = NODE_COUNTS.map(payloadSizes); // 결정적, Node 산출
+const payload = NODE_COUNTS.map(payloadSizes);
 const result = {
   axis: "overhead",
   engine: "chromium",

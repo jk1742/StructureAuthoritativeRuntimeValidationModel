@@ -1,29 +1,7 @@
-/* =====================================================================
- * react/matrix-react-run.mjs — Case 4 / Model B 탐지 측정 드라이버 (실 React, Chromium via Playwright)
- * ---------------------------------------------------------------------
- * ※ 작성자 로컬에서만 실행 (HANDOFF §8: Playwright 브라우저 바이너리는
- *    샌드박스에서 다운로드 불가).
- *
- *   npm install playwright
- *   npx playwright install chromium   # firefox 는 선택(교차 검증 시)
- *   node react/matrix-react-run.mjs
- *
- * 출력: react/case4_react_result.json (측정값). placeholder 없음.
- * 엔진 정책: 공통 주 엔진 = Chromium. Firefox 는 선택적 교차(미설치 시 skip).
- *
- * 측정 절차(시나리오 1회 = 페이지 새로고침으로 독립 보장):
- *   1) 페이지 로드 → __case4 준비 대기
- *   2) Playwright fill() 로 input 에 실 입력 이벤트(사용자 타이핑 모사)
- *   3) 리렌더 직전 현재 노드에 마커
- *   4) 리렌더(sameKey / newKey / attackerSameKey)
- *   5) input 실제 값 + name + 노드 재사용 여부 판정
- *
- * 해석:
- *   R1(보존)   := 리렌더 후 값 == 사용자가 친 값
- *   R2(폐기)   := 리렌더 후 값 == ""
- *   R3(위조)   := name 이 공격자 값으로 바뀌고 값까지 잔존(= 위장 + 탈취 성공)
- * ===================================================================== */
-import { chromium } from "playwright"; // firefox 교차 측정 비활성(Chromium 통일)
+/* 
+ * react/matrix-react-run.mjs — Case 4 / Model B ( React, Chromium via Playwright)
+ */
+import { chromium } from "playwright";
 // import { chromium, firefox } from "playwright";
 import { writeFileSync } from "fs";
 import { fileURLToPath } from "url";
@@ -46,7 +24,7 @@ async function newReadyPage(browser, engineName) {
     try {
       await page.addScriptTag({ path: p });
     } catch (e) {
-      throw new Error(`[${engineName}] 스크립트 주입 실패 (${label} @ ${p}): ${(e && e.message) || e}`);
+      throw new Error(`[${engineName}] script inject failed (${label} @ ${p}): ${(e && e.message) || e}`);
     }
   }
 
@@ -60,7 +38,7 @@ async function newReadyPage(browser, engineName) {
   console.log(`[${engineName} diag]`, JSON.stringify(diag));
   if (!diag.ready) {
     throw new Error(
-      `[${engineName}] 하니스 초기화 실패: ${diag.error || "원인 미상"} ` +
+      `[${engineName}] failed initialize: ${diag.error || "error"} ` +
       `(React=${diag.React}, ReactDOM=${diag.ReactDOM}, createRoot=${diag.createRoot})`
     );
   }
@@ -69,7 +47,7 @@ async function newReadyPage(browser, engineName) {
 
 async function runScenario(browser, engineName, mode) {
   const page = await newReadyPage(browser, engineName);
-  await page.fill("#probe-input", TYPED); // 실 입력 이벤트
+  await page.fill("#probe-input", TYPED);
   const typed = await page.evaluate(() => window.__case4.inputValue());
   await page.evaluate(() => window.__case4.markNode());
 
@@ -97,10 +75,10 @@ async function measure(engineName, launcher) {
   try {
     return {
       engine: engineName,
-      R1_sameKey: await runScenario(browser, engineName, "sameKey"),         // R1 보존(성공)
-      R2_sameKey: await runScenario(browser, engineName, "sameKey"),         // R2 폐기: sameKey 에선 실패(음성 대조)
-      R2_newKey_control: await runScenario(browser, engineName, "newKey"),   // R2 폐기: newKey 규율 시에만 성공
-      R3_attackerSameKey: await runScenario(browser, engineName, "attackerSameKey"), // R3 replay(관찰된 key)
+      R1_sameKey: await runScenario(browser, engineName, "sameKey"),         
+      R2_sameKey: await runScenario(browser, engineName, "sameKey"),         
+      R2_newKey_control: await runScenario(browser, engineName, "newKey"),   
+      R3_attackerSameKey: await runScenario(browser, engineName, "attackerSameKey"),
     };
   } finally {
     await browser.close();
@@ -108,9 +86,9 @@ async function measure(engineName, launcher) {
 }
 
 const engines = {};
-engines.chromium = await measure("chromium", chromium); // 공통 주 엔진
+engines.chromium = await measure("chromium", chromium);
 // try {
-//   engines.firefox = await measure("firefox", firefox); // 선택적 교차
+//   engines.firefox = await measure("firefox", firefox);
 // } catch (e) {
 //   engines.firefox = { skipped: true, reason: String((e && e.message) || e) };
 // }
@@ -122,13 +100,11 @@ const result = {
   engines,
   reading: {
     R1_R2:
-      "같은 key 유지 → 노드 재사용 → 값 보존. R1(보존)은 맞히나 R2(폐기)는 틀린다. " +
-      "key 를 바꾸면(R2_newKey_control) 폐기를 맞히지만 그것은 개발자 key 규율 의존.",
+      "Same key kept -> node reused -> value preserved. Correct on R1 (preserve) but wrong on R2 (discard). Changing the key (R2_newKey_control) gets the discard right, but that relies on developer key discipline.",
     R3:
-      "공격자가 같은 key 로 컴포넌트를 악성 정의로 교체 → 노드 재사용 → 비제어 입력값이 " +
-      "악성 정의로 잔존 = 위장+탈취 성공. key 는 client hint 라 lineage 단절을 강제 못 함.",
+      "Attacker replaces the component with a malicious definition under the same key -> node reused -> uncontrolled input value persists into the malicious definition = spoofing + hijack succeeds. A key is a client hint and cannot force a lineage break.",
     claim:
-      "권위 lineage(Model C, 별도 측정)는 규율 없이 새 id 발급/미발급 검증만으로 R2·R3 를 맞힌다.",
+      "An authority lineage (Model C, measured separately) gets R2 and R3 right with no discipline required, by issuing a new id / verifying non-issuance alone.",
   },
 };
 
