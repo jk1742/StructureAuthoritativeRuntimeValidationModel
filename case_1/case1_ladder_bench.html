@@ -1,0 +1,83 @@
+<!doctype html>
+<!--
+ * case_1/browser/case1_ladder_bench.html
+ * ===========================================================================
+ * Paper Section 6 - Case 1: Forgery Cost Ladder (in-browser, real DOM)
+ *
+ * case1_ladder_experiment.mjs(JSDOM)의 형제. 동일 모델/상수를 쓰되 실 Chromium/
+ * Firefox DOM 에서 돈다. 차이는 단 하나, 스코프 분리:
+ *   - 앱 스코프(이 모듈 스크립트): createRegistry 의 결과를 모듈 클로저에 두고
+ *     window 에 노출하지 않는다.  model-core 가 { mount, validate, commit } 만
+ *     반환하므로(line 134) indexMap/nodeToId 는 어디서도 도달 불가 = mapsReachable false.
+ *   - 공격자 스코프(드라이버의 page.evaluate): document/window 만 가진다.
+ *
+ * model-core.mjs 는 import 가 없어 브라우저에서 그대로 로드된다(JSDOM 불필요).
+ * ===========================================================================
+-->
+<html>
+  <head><meta charset="utf-8" /><title>Case 1 ladder bench (real DOM)</title></head>
+  <body>
+    <form id="root">
+      <input id="username" type="text" />
+      <input id="agree" type="checkbox" />
+      <textarea id="memo">hello world</textarea>
+    </form>
+
+    <script type="module">
+      import { createRegistry } from "../../model-core.mjs";
+      
+      const INIT_USERNAME = "alice";
+      const INIT_AGREE = false;
+      const INIT_MEMO = "hello world";
+
+      // case1_ladder_experiment.mjs 의 canonicalTree() 와 동일
+      const canonicalTree = () => ({
+        id: "e-root", parentId: null, order: 0, type: "form", children: [
+          { id: "e-username", parentId: "e-root", order: 0, type: "input",    value: INIT_USERNAME, children: [] },
+          { id: "e-agree",    parentId: "e-root", order: 1, type: "input",    checked: INIT_AGREE,  children: [] },
+          { id: "e-memo",     parentId: "e-root", order: 2, type: "textarea", value: INIT_MEMO,     children: [] },
+        ],
+      });
+
+      // baseline (MetaTag): truth as in-DOM <meta>, on the mutable surface
+      const setTruth = (id, v) => {
+        let m = document.querySelector(`meta[name="truth:${id}"]`);
+        if (!m) { m = document.createElement("meta"); m.setAttribute("name", `truth:${id}`); document.head.appendChild(m); }
+        m.setAttribute("content", String(v));
+      };
+      const metaValid = (id) => {
+        const node = document.getElementById(id);
+        const truth = (document.querySelector(`meta[name="truth:${id}"]`) || {}).getAttribute
+          ? document.querySelector(`meta[name="truth:${id}"]`).getAttribute("content") : null;
+        if (node.type === "checkbox" || node.type === "radio") return String(!!node.checked) === String(truth === "true");
+        return String(node.value ?? "") === String(truth ?? "");
+      };
+
+      // init: 정당한 초기값을 commit 으로 provenance 등록(=공격 전 상태는 VALID)
+      const U = document.getElementById("username");
+      const A = document.getElementById("agree");
+      const M = document.getElementById("memo");
+      U.value = INIT_USERNAME; A.checked = INIT_AGREE; M.value = INIT_MEMO;
+      setTruth("username", INIT_USERNAME); setTruth("agree", INIT_AGREE); setTruth("memo", INIT_MEMO);
+
+      const registry = createRegistry(document);            // ← 클로저. window 노출 금지.
+      registry.mount(document.getElementById("root"), canonicalTree());
+      registry.commit(U); registry.commit(A); registry.commit(M);
+
+      // 공격자에게 노출되는 건 읽기용 verdict 함수뿐(클로저는 새지 않음)
+      window.__app = {
+        verdict() {                                          // proposed: validate throw → 검출
+          try { registry.validate(document.getElementById("root")); return { passed: true, reason: null }; }
+          catch (e) { return { passed: false, reason: (e && e.message) ? e.message : String(e) }; }
+        },
+        metaDetected() {                                     // baseline: 한 필드라도 어긋나면 검출
+          return ["username", "agree", "memo"].some((id) => !metaValid(id));
+        },
+        // L3 전용: 위협모델이 배제한 "내부 채널 구동" 등급. commit 만 구동하고 maps 는 노출 안 함
+        //   → L2 의 mapsReachable 측정은 이 함수 존재와 무관하게 false 유지.
+        __demoInsideChannelDrive(id) { registry.commit(document.getElementById(id)); },
+      };
+      window.__ready = true;
+    </script>
+  </body>
+</html>

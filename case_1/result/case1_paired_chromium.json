@@ -1,0 +1,152 @@
+{
+  "engine": "chromium",
+  "engineVersion": "148.0.7778.96",
+  "case": "case1",
+  "paired": "proposed/baseline",
+  "note": "timed: real validate (structure+state) vs state-only baseline; ratio>=1 by design, O(N). Paper cites payload only.",
+  "rows": [
+    {
+      "nodes": 10,
+      "ratio_median": 5.4833,
+      "ratio_iqr": [
+        5.4391,
+        5.5324
+      ],
+      "baseline_ms_median": 0.0022,
+      "proposed_ms_median": 0.0121
+    },
+    {
+      "nodes": 50,
+      "ratio_median": 3.8151,
+      "ratio_iqr": [
+        3.8025,
+        3.8224
+      ],
+      "baseline_ms_median": 0.0136,
+      "proposed_ms_median": 0.0517
+    },
+    {
+      "nodes": 100,
+      "ratio_median": 3.7977,
+      "ratio_iqr": [
+        3.7848,
+        3.8187
+      ],
+      "baseline_ms_median": 0.022,
+      "proposed_ms_median": 0.0836
+    },
+    {
+      "nodes": 200,
+      "ratio_median": 3.6557,
+      "ratio_iqr": [
+        3.6348,
+        3.6621
+      ],
+      "baseline_ms_median": 0.0533,
+      "proposed_ms_median": 0.1967
+    },
+    {
+      "nodes": 500,
+      "ratio_median": 3.3383,
+      "ratio_iqr": [
+        3.3184,
+        3.3961
+      ],
+      "baseline_ms_median": 0.1398,
+      "proposed_ms_median": 0.4746
+    },
+    {
+      "nodes": 1000,
+      "ratio_median": 3.1929,
+      "ratio_iqr": [
+        3.1736,
+        3.2228
+      ],
+      "baseline_ms_median": 0.3333,
+      "proposed_ms_median": 1.0333
+    },
+    {
+      "nodes": 2000,
+      "ratio_median": 3.1778,
+      "ratio_iqr": [
+        3.1465,
+        3.2248
+      ],
+      "baseline_ms_median": 0.5923,
+      "proposed_ms_median": 1.9208
+    }
+  ],
+  "payload": [
+    {
+      "nodes": 10,
+      "baseline_nodes": 20,
+      "proposed_nodes": 10,
+      "baseline_bytes": 965,
+      "proposed_bytes": 535,
+      "proposed_vs_baseline_ratio": 0.5544
+    },
+    {
+      "nodes": 50,
+      "baseline_nodes": 100,
+      "proposed_nodes": 50,
+      "baseline_bytes": 4685,
+      "proposed_bytes": 2455,
+      "proposed_vs_baseline_ratio": 0.524
+    },
+    {
+      "nodes": 100,
+      "baseline_nodes": 200,
+      "proposed_nodes": 100,
+      "baseline_bytes": 9335,
+      "proposed_bytes": 4855,
+      "proposed_vs_baseline_ratio": 0.5201
+    },
+    {
+      "nodes": 200,
+      "baseline_nodes": 400,
+      "proposed_nodes": 200,
+      "baseline_bytes": 19035,
+      "proposed_bytes": 9855,
+      "proposed_vs_baseline_ratio": 0.5177
+    },
+    {
+      "nodes": 500,
+      "baseline_nodes": 1000,
+      "proposed_nodes": 500,
+      "baseline_bytes": 48135,
+      "proposed_bytes": 24855,
+      "proposed_vs_baseline_ratio": 0.5164
+    },
+    {
+      "nodes": 1000,
+      "baseline_nodes": 2000,
+      "proposed_nodes": 1000,
+      "baseline_bytes": 96635,
+      "proposed_bytes": 49855,
+      "proposed_vs_baseline_ratio": 0.5159
+    },
+    {
+      "nodes": 2000,
+      "baseline_nodes": 4000,
+      "proposed_nodes": 2000,
+      "baseline_bytes": 197635,
+      "proposed_bytes": 101855,
+      "proposed_vs_baseline_ratio": 0.5154
+    }
+  ],
+  "config": {
+    "nodeCounts": [
+      10,
+      50,
+      100,
+      200,
+      500,
+      1000,
+      2000
+    ],
+    "repeat": 30,
+    "warmup": 3,
+    "runs": 10,
+    "targetMs": 5
+  }
+}

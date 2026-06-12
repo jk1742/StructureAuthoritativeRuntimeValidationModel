@@ -1,0 +1,15 @@
+{
+  "name": "case1-detection",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Case 1 - Runtime State Forgery Detection. Reproduces Table 2 (baseline in-DOM meta vs proposed registry). The proposed model is imported from model-core.mjs (the Section 5 model used by the demo), not reimplemented.",
+  "scripts": {
+    "setup": "playwright install chromium firefox",
+    "experiment": "node case1_ladder_browser_experiment.mjs",
+    "overhead": "node case1_paired_run.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}

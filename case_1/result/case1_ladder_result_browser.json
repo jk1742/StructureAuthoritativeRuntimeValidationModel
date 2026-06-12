@@ -1,0 +1,99 @@
+{
+  "case": "case1-ladder",
+  "bench": "http://127.0.0.1:56756/bench.html",
+  "timestamp": "2026-06-11T13:32:01.067Z",
+  "engines": {
+    "chromium": [
+      {
+        "level": "S1",
+        "baseline": "Detected",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
+        "level": "S2",
+        "baseline": "Detected",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: checked expected false, got true (not committed)"
+      },
+      {
+        "level": "S3",
+        "baseline": "Detected",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"hello world\", got \"INJECTED\" (not committed)"
+      },
+      {
+        "level": "S4",
+        "baseline": "Bypassed",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
+        "level": "L2",
+        "baseline": "—",
+        "proposed": "Detected",
+        "mapsReachable": false,
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
+        "level": "L4",
+        "baseline": "—",
+        "proposed": "Disrupted",
+        "reason": "STRUCTURAL_DEVIATION: no binding (broken identity)"
+      },
+      {
+        "level": "L3",
+        "baseline": "—",
+        "proposed": "Bypassed",
+        "reason": null,
+        "scope": "inside (excluded by threat model)"
+      }
+    ],
+    "firefox": [
+      {
+        "level": "S1",
+        "baseline": "Detected",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
+        "level": "S2",
+        "baseline": "Detected",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: checked expected false, got true (not committed)"
+      },
+      {
+        "level": "S3",
+        "baseline": "Detected",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"hello world\", got \"INJECTED\" (not committed)"
+      },
+      {
+        "level": "S4",
+        "baseline": "Bypassed",
+        "proposed": "Detected",
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
+        "level": "L2",
+        "baseline": "—",
+        "proposed": "Detected",
+        "mapsReachable": false,
+        "reason": "RUNTIME_STATE_FORGERY: value expected \"alice\", got \"attacker\" (not committed)"
+      },
+      {
+        "level": "L4",
+        "baseline": "—",
+        "proposed": "Disrupted",
+        "reason": "STRUCTURAL_DEVIATION: no binding (broken identity)"
+      },
+      {
+        "level": "L3",
+        "baseline": "—",
+        "proposed": "Bypassed",
+        "reason": null,
+        "scope": "inside (excluded by threat model)"
+      }
+    ]
+  }
+}
