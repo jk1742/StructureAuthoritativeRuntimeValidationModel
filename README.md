@@ -75,7 +75,7 @@ does strictly more work — a full structure walk — at the same `O(N)`).
 `commit()` and `model-core.mjs` are **unchanged** by the gate — the provenance check lives
 at the event-delegation entry point in the harness, not in the registry.
 
-**Run:** `node case1_ladder_browser_experiment.mjs`
+**Run:** # from case_1/ `node case1_ladder_browser_experiment.mjs`
 
 ---
 
@@ -118,7 +118,7 @@ overhead ratio is near parity — detection, not a single overhead figure, is th
 | `results/paired_case3_chromium.json`, `results/paired_case3_firefox.json` | Timing results. |
 | `results/case3_fig1_detection.svg` | Detection figure. |
 
-**Run:** `node case3_experiment_jsdom.mjs`
+**Run:** # from case_3/ `node case3_experiment_jsdom.mjs`
 
 ---
 
@@ -169,6 +169,7 @@ cost; only innerHTML swap (A) runs consistently higher.
 
 **Run:**
 ```
+# from case_4/
 node chromium/matrix-run.mjs      # reconstruction matrix
 node chromium/overhead-run.mjs    # overhead
 ```
