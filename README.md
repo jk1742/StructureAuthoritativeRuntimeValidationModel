@@ -13,17 +13,43 @@ All detection verdicts are **rendering-independent** and reproduce identically o
 **Chromium 148** (Blink/V8) and **Firefox 150** (Gecko/SpiderMonkey). The shared truth
 model lives in the top-level `model-core.mjs`.
 
-For a one-page summary of all results, open **`result_dashboard.html`**.
+For a one-page summary of all results, open **`results_dashboard.html`**.
 
 ## Repository layout
 
 ```
 model-core.mjs            shared canonical-structure registry (CSR)
-result_dashboard.html     combined Tables 2–4 summary
+results_dashboard.html    combined Tables 2–4 summary
 case_1/                   in-DOM baseline vs. off-surface validation  (paper Table 2)
 case_3/                   snapshot-diff vs. identity continuity        (paper Table 3)
 case_4/                   component reconstruction consistency         (paper Table 4)
 ```
+
+## Environment
+
+Results were produced under the following environment:
+
+| | |
+|---|---|
+| CPU | Intel Core i7-8565U (4 cores / 8 threads, base 1.80 GHz) |
+| RAM | 15.8 GB |
+| OS | Windows 11 (64-bit) |
+| Power plan | High performance, CPU turbo disabled (clock held near base) |
+| Node.js | v22.14.0 |
+| Engines | Chromium 148.0.7778.96, Firefox 150.0.2 |
+| Browser driver | Playwright 1.60.0 |
+| React reference | React 18.3.1 (Case 4 overhead reference) |
+
+This is a mobile-class CPU. For the committed runs, CPU turbo was disabled so the
+clock stays near its base frequency, which reduces run-to-run drift in the median. The
+paired protocol additionally times baseline and proposed in **adjacent windows** and
+forms the ratio in place, so any residual momentary clock variation cancels. Reported
+ratios are therefore robust to clock variation; re-running on other hardware is
+expected to change absolute times but not the ratios or the order.
+
+Detection verdicts are rendering-independent and reproduce identically across both
+engines; only overhead timings depend on the machine above, which is why they are
+reported as a ratio to the keyed-reconcile baseline (B = 1.0).
 
 ---
 
